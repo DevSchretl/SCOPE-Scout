@@ -1,0 +1,1695 @@
+[
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 1,
+      "requiredTotal": 1,
+      "preferredMet": 2,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": null,
+    "expected": 10
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 3,
+      "requiredTotal": 3,
+      "preferredMet": 3,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 21,
+    "expected": 9.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 2,
+      "requiredTotal": 2,
+      "preferredMet": 6,
+      "preferredTotal": 8,
+      "thinDescription": false
+    },
+    "applicants": null,
+    "expected": 9.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 3,
+      "requiredTotal": 3,
+      "preferredMet": 3,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 35,
+    "expected": 9.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 4,
+      "requiredTotal": 4,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 48,
+    "expected": 8.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 3,
+      "requiredTotal": 3,
+      "preferredMet": 4,
+      "preferredTotal": 5,
+      "thinDescription": false
+    },
+    "applicants": 53,
+    "expected": 8.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 2,
+      "requiredTotal": 2,
+      "preferredMet": 2,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 48,
+    "expected": 8.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 2,
+      "requiredTotal": 2,
+      "preferredMet": 2,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 55,
+    "expected": 8.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 2,
+      "requiredTotal": 2,
+      "preferredMet": 2,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 56,
+    "expected": 8.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 2,
+      "requiredTotal": 2,
+      "preferredMet": 2.5,
+      "preferredTotal": 5,
+      "thinDescription": false
+    },
+    "applicants": 11,
+    "expected": 8.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 11,
+      "requiredTotal": 12,
+      "preferredMet": 2,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 11,
+    "expected": 8.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 1,
+      "requiredTotal": 1,
+      "preferredMet": 0.5,
+      "preferredTotal": 1,
+      "thinDescription": true
+    },
+    "applicants": 13,
+    "expected": 7.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 3,
+      "requiredTotal": 3,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 16,
+    "expected": 7.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 1,
+      "requiredTotal": 1,
+      "preferredMet": 1.5,
+      "preferredTotal": 8,
+      "thinDescription": false
+    },
+    "applicants": 30,
+    "expected": 7.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 5,
+      "requiredTotal": 5,
+      "preferredMet": 2,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 10,
+    "expected": 7.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 1,
+      "requiredTotal": 1,
+      "preferredMet": 0.5,
+      "preferredTotal": 8,
+      "thinDescription": false
+    },
+    "applicants": 54,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 3,
+      "requiredTotal": 3,
+      "preferredMet": 1,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 62,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 3,
+      "requiredTotal": 3,
+      "preferredMet": 0,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 46,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 1,
+      "requiredTotal": 1,
+      "preferredMet": 4.5,
+      "preferredTotal": 11,
+      "thinDescription": false
+    },
+    "applicants": 91,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 3,
+      "requiredTotal": 3,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 16,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 1,
+      "requiredTotal": 1,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 21,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4,
+      "requiredTotal": 5,
+      "preferredMet": 2,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 5,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4,
+      "requiredTotal": 5,
+      "preferredMet": 1,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 8,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4.5,
+      "requiredTotal": 6,
+      "preferredMet": 3.5,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 17,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4,
+      "requiredTotal": 5,
+      "preferredMet": 1.5,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 46,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 5,
+      "requiredTotal": 6,
+      "preferredMet": 9,
+      "preferredTotal": 13,
+      "thinDescription": false
+    },
+    "applicants": 54,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4,
+      "requiredTotal": 5,
+      "preferredMet": 2,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 26,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 19,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 5,
+      "requiredTotal": 6,
+      "preferredMet": 4.5,
+      "preferredTotal": 14,
+      "thinDescription": false
+    },
+    "applicants": 22,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 4,
+      "requiredTotal": 5,
+      "preferredMet": 1,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 16,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4.5,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 10,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 3.5,
+      "requiredTotal": 4,
+      "preferredMet": 1,
+      "preferredTotal": 1,
+      "thinDescription": true
+    },
+    "applicants": 18,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4,
+      "requiredTotal": 5,
+      "preferredMet": 3.5,
+      "preferredTotal": 5,
+      "thinDescription": false
+    },
+    "applicants": 44,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 0.5,
+      "requiredTotal": 1,
+      "preferredMet": 1,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 30,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 8,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 1.5,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 64,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 5,
+      "requiredTotal": 6,
+      "preferredMet": 1.5,
+      "preferredTotal": 5,
+      "thinDescription": false
+    },
+    "applicants": 48,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4,
+      "requiredTotal": 5,
+      "preferredMet": 2.5,
+      "preferredTotal": 8,
+      "thinDescription": false
+    },
+    "applicants": 47,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 8.5,
+      "requiredTotal": 11,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 8,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 5,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 2,
+      "requiredTotal": 3,
+      "preferredMet": 1,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 25,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 19,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 15,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 2.5,
+      "requiredTotal": 4,
+      "preferredMet": 1,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 65,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 3.5,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 32,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 16,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 2,
+      "preferredTotal": 6,
+      "thinDescription": false
+    },
+    "applicants": 25,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 1,
+      "requiredMet": 1,
+      "requiredTotal": 1,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": null,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 37,
+    "expected": 4.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 1.5,
+      "requiredTotal": 3,
+      "preferredMet": 1,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 36,
+    "expected": 4.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 2,
+    "expected": 4.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 4,
+      "requiredTotal": 6,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 26,
+    "expected": 4.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 5.5,
+      "requiredTotal": 8,
+      "preferredMet": 1,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 9,
+    "expected": 4.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 35,
+    "expected": 4.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 5,
+    "expected": 4.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 2,
+      "preferredTotal": 6,
+      "thinDescription": true
+    },
+    "applicants": 29,
+    "expected": 4.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 66,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0.5,
+      "requiredTotal": 1,
+      "preferredMet": 0,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 5,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 17,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 19,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 15,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 10,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 2.5,
+      "requiredTotal": 4,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 78,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 1,
+      "requiredTotal": 2,
+      "preferredMet": 0,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 6,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 1,
+      "preferredMet": 1,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 11,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 3,
+      "requiredTotal": 5,
+      "preferredMet": 1,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 7,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0.5,
+      "requiredTotal": 1,
+      "preferredMet": 0,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 13,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 2.5,
+      "requiredTotal": 4,
+      "preferredMet": 1,
+      "preferredTotal": 9,
+      "thinDescription": false
+    },
+    "applicants": 66,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 2,
+      "requiredTotal": 4,
+      "preferredMet": 1,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 41,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 2,
+      "requiredTotal": 3,
+      "preferredMet": 1.5,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 24,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 2,
+      "requiredTotal": 3,
+      "preferredMet": 0,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 11,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 1.5,
+      "requiredTotal": 3,
+      "preferredMet": 1,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 65,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 1.5,
+      "requiredTotal": 3,
+      "preferredMet": 1,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 72,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 3.5,
+      "requiredTotal": 6,
+      "preferredMet": 1,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 10,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 7.5,
+      "requiredTotal": 12,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 7,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 2,
+      "requiredTotal": 4,
+      "preferredMet": 2,
+      "preferredTotal": 6,
+      "thinDescription": false
+    },
+    "applicants": null,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 3.5,
+      "requiredTotal": 6,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 85,
+    "expected": 3.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 2,
+      "requiredTotal": 3,
+      "preferredMet": 2.5,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 36,
+    "expected": 3.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0,
+      "requiredTotal": 2,
+      "preferredMet": 2,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 22,
+    "expected": 3.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 5,
+      "requiredTotal": 13,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 8,
+    "expected": 2.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 1,
+      "requiredTotal": 2,
+      "preferredMet": 0,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 69,
+    "expected": 2.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1.5,
+      "requiredTotal": 4,
+      "preferredMet": 1,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 11,
+    "expected": 2.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 2.5,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 13,
+    "expected": 2.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 3.5,
+      "requiredTotal": 8,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 5,
+    "expected": 2.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 4,
+      "requiredTotal": 9,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 3,
+    "expected": 2.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0.5,
+      "requiredTotal": 2,
+      "preferredMet": 0,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": null,
+    "expected": 2.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 2,
+      "preferredMet": 2,
+      "preferredTotal": 6,
+      "thinDescription": false
+    },
+    "applicants": 21,
+    "expected": 2.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 2,
+      "requiredTotal": 4,
+      "preferredMet": 2,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 46,
+    "expected": 2.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 3,
+      "requiredTotal": 6,
+      "preferredMet": 1,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 11,
+    "expected": 2.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 2.5,
+      "requiredTotal": 6,
+      "preferredMet": 0,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 6,
+    "expected": 2.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 9,
+    "expected": 2.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 7,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 3,
+    "expected": 2.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 2,
+      "requiredTotal": 4,
+      "preferredMet": 0,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": null,
+    "expected": 2.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 3.5,
+      "requiredTotal": 8,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 31,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 4,
+      "preferredMet": 1,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 17,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1.5,
+      "requiredTotal": 4,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 53,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1.5,
+      "requiredTotal": 3,
+      "preferredMet": 0,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 13,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 4,
+      "preferredMet": 0,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 1,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1.5,
+      "requiredTotal": 3,
+      "preferredMet": 0,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 10,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 2.5,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 25,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 2,
+      "requiredTotal": 8,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 12,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 4,
+      "preferredMet": 3,
+      "preferredTotal": 5,
+      "thinDescription": false
+    },
+    "applicants": 17,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 2,
+      "requiredTotal": 4,
+      "preferredMet": 0,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 13,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 1,
+      "requiredTotal": 3,
+      "preferredMet": 0,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 68,
+    "expected": 1
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 57,
+    "expected": 1
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 6,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 63,
+    "expected": 1
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 6,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 49,
+    "expected": 1
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 6,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 48,
+    "expected": 1
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1,
+      "requiredTotal": 7,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 46,
+    "expected": 1
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 2,
+      "requiredTotal": 2,
+      "preferredMet": 3,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 18,
+    "expected": 9.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 5,
+      "requiredMet": 2,
+      "requiredTotal": 2,
+      "preferredMet": 1.5,
+      "preferredTotal": 2,
+      "thinDescription": false
+    },
+    "applicants": 89,
+    "expected": 8.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 3.5,
+      "requiredTotal": 4,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 4,
+    "expected": 7.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 3,
+      "requiredTotal": 4,
+      "preferredMet": 2,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 26,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 4.5,
+      "requiredTotal": 5,
+      "preferredMet": 1,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 39,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 2,
+      "requiredTotal": 3,
+      "preferredMet": 3.5,
+      "preferredTotal": 5,
+      "thinDescription": false
+    },
+    "applicants": 16,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 6,
+    "expected": 5.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 3,
+      "requiredTotal": 4,
+      "preferredMet": 0.5,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 26,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 13,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 21,
+    "expected": 5.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 6,
+    "expected": 4.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 0,
+      "requiredTotal": 0,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": true
+    },
+    "applicants": 24,
+    "expected": 4.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 1.5,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 0,
+      "thinDescription": false
+    },
+    "applicants": 13,
+    "expected": 1.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 3.5,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 21,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 3.5,
+      "requiredTotal": 5,
+      "preferredMet": 2,
+      "preferredTotal": 4,
+      "thinDescription": false
+    },
+    "applicants": 13,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 2,
+      "requiredMet": 2,
+      "requiredTotal": 4,
+      "preferredMet": 2,
+      "preferredTotal": 5,
+      "thinDescription": false
+    },
+    "applicants": 22,
+    "expected": 2.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "thinDescription": false
+    },
+    "applicants": 3,
+    "expected": null
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 2,
+      "requiredTotal": 2,
+      "preferredMet": 0.5,
+      "preferredTotal": 3,
+      "thinDescription": false
+    },
+    "applicants": 9,
+    "expected": 8.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 1,
+      "requiredTotal": 1,
+      "preferredMet": 2.5,
+      "preferredTotal": 10,
+      "thinDescription": false
+    },
+    "applicants": 10,
+    "expected": 6.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 4,
+      "requiredMet": 2.5,
+      "requiredTotal": 3,
+      "preferredMet": 0,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 7,
+    "expected": 6.0
+  },
+  {
+    "score": {
+      "section": "pick",
+      "fit": 3,
+      "requiredMet": 3.5,
+      "requiredTotal": 5,
+      "preferredMet": 0,
+      "preferredTotal": 1,
+      "thinDescription": false
+    },
+    "applicants": 12,
+    "expected": 3.5
+  },
+  {
+    "score": {
+      "section": "pick",
+      "thinDescription": false
+    },
+    "applicants": null,
+    "expected": null
+  }
+]
