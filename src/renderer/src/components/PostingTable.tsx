@@ -1,3 +1,4 @@
+import { DUE_SOON_DAYS } from '../../../shared/config'
 import {
   competitionLabel,
   daysLeft,
@@ -5,69 +6,38 @@ import {
   postingMatch,
   reqMatchText
 } from '../../../shared/derive'
-import { MY_STATUSES, type MyStatus, type Posting, type RunRecord } from '../../../shared/types'
-import { formatDate, formatDays, formatDeadline, matchColor } from '../format'
-
-export type TableKind = 'picks' | 'near' | 'inprog' | 'all'
+import type { SheetKind } from '../../../shared/sheets'
+import type { MyStatus, Posting, RunRecord } from '../../../shared/types'
+import { formatDate, formatDeadline } from '../format'
+import { DaysLeft, MatchBadge, NewBadge, StatusSelect } from './Badges'
 
 interface Props {
   rows: Posting[]
-  kind: TableKind
+  kind: SheetKind
   lastRun: RunRecord | null
   selectedId: string | null
   onSelect: (id: string) => void
   onStatus: (id: string, status: MyStatus) => void
 }
 
-export function StatusSelect({
-  posting,
-  onStatus
-}: {
-  posting: Posting
-  onStatus: (id: string, status: MyStatus) => void
-}): React.JSX.Element {
-  return (
-    <select
-      className="status-select"
-      value={posting.myStatus}
-      onClick={(e) => e.stopPropagation()}
-      onChange={(e) => onStatus(posting.id, e.target.value as MyStatus)}
-    >
-      {MY_STATUSES.map((s) => (
-        <option key={s} value={s}>
-          {s || 'None'}
-        </option>
-      ))}
-    </select>
-  )
-}
-
-export function MatchBadge({ value }: { value: number | null }): React.JSX.Element {
-  if (value === null) return <span className="match none">n/a</span>
-  return (
-    <span className="match" style={{ background: matchColor(value) }}>
-      {value.toFixed(1)}
-    </span>
-  )
-}
-
-const HEADERS: Record<TableKind, string[]> = {
+/** Column headers; a leading "#" right-aligns the column. */
+const HEADERS: Record<SheetKind, string[]> = {
   picks: [
     'Match',
-    'Fit',
+    '#Fit',
     'Req match',
     'Title',
     'Organization',
     'City',
     'Deadline',
-    'Days left',
-    'Applicants',
+    '#Days left',
+    '#Applicants',
     'Status'
   ],
-  near: ['Fit', 'Title', 'Organization', 'City', 'Why it missed', 'Added'],
+  near: ['#Fit', 'Title', 'Organization', 'City', 'Why it missed', 'Added'],
   inprog: ['Title', 'Organization', 'Deadline', 'SCOPE app status', 'Your status'],
   all: [
-    'ID',
+    '#ID',
     'Title',
     'Organization',
     'Location',
@@ -87,48 +57,61 @@ export default function PostingTable({
   onSelect,
   onStatus
 }: Props): React.JSX.Element {
-  if (!rows.length) return <p className="empty">Nothing here yet.</p>
   return (
     <table className={`postings ${kind}`}>
       <thead>
         <tr>
           {HEADERS[kind].map((h) => (
-            <th key={h}>{h}</th>
+            <th key={h} className={h.startsWith('#') ? 'num' : undefined}>
+              {h.replace(/^#/, '')}
+            </th>
           ))}
         </tr>
       </thead>
       <tbody>
         {rows.map((p) => {
           const days = daysLeft(p.listing.deadline)
+          const closed = days !== null && days < 0
+          const soon = days !== null && days >= 0 && days <= DUE_SOON_DAYS
           const classes = [
             p.id === selectedId ? 'selected' : '',
-            days !== null && days < 0 ? 'past' : '',
-            days !== null && days >= 0 && days <= 3 ? 'due-soon' : '',
-            p.myStatus === 'Skip' || !p.onScopeNow ? 'dim' : ''
+            closed || p.myStatus === 'Skip' || !p.onScopeNow ? 'muted' : ''
           ]
           const title = (
             <td className="title">
-              {isNewIn(p, lastRun) && <span className="new">New</span>}
+              {isNewIn(p, lastRun) && <NewBadge />}
               {p.listing.title}
             </td>
           )
+          const org = <td className="org">{p.listing.org}</td>
           const deadline = (
-            <td className="nowrap">{formatDeadline(p.listing.deadline, p.listing.deadlineText)}</td>
+            <td className={soon ? 'nowrap soon-text' : 'nowrap'}>
+              {formatDeadline(p.listing.deadline, p.listing.deadlineText)}
+            </td>
           )
           return (
-            <tr key={p.id} className={classes.join(' ')} onClick={() => onSelect(p.id)}>
+            <tr
+              key={p.id}
+              className={classes.join(' ').trim()}
+              aria-selected={p.id === selectedId}
+              onClick={() => onSelect(p.id)}
+            >
               {kind === 'picks' && (
                 <>
                   <td>
                     <MatchBadge value={postingMatch(p)} />
                   </td>
                   <td className="num">{p.score?.fit ?? ''}</td>
-                  <td className="nowrap">{reqMatchText(p.score) || 'not counted'}</td>
+                  <td className="nowrap">
+                    {reqMatchText(p.score) || <span className="faint">not counted</span>}
+                  </td>
                   {title}
-                  <td>{p.listing.org}</td>
+                  {org}
                   <td>{p.score?.city || p.listing.location}</td>
                   {deadline}
-                  <td className="num">{formatDays(days)}</td>
+                  <td className="num">
+                    <DaysLeft days={days} />
+                  </td>
                   <td className="num" title={competitionLabel(p.listing.applicants)}>
                     {p.listing.applicants ?? ''}
                   </td>
@@ -141,7 +124,7 @@ export default function PostingTable({
                 <>
                   <td className="num">{p.score?.fit ?? ''}</td>
                   {title}
-                  <td>{p.listing.org}</td>
+                  {org}
                   <td>{p.score?.city || p.listing.location}</td>
                   <td className="wrap">{p.score?.whyMissed}</td>
                   <td className="nowrap">{formatDate(p.score?.scoredAt)}</td>
@@ -150,7 +133,7 @@ export default function PostingTable({
               {kind === 'inprog' && (
                 <>
                   {title}
-                  <td>{p.listing.org}</td>
+                  {org}
                   {deadline}
                   <td>{p.listing.appStatus !== '-' ? p.listing.appStatus : ''}</td>
                   <td>
@@ -160,15 +143,15 @@ export default function PostingTable({
               )}
               {kind === 'all' && (
                 <>
-                  <td className="num">{p.id}</td>
+                  <td className="num faint">{p.id}</td>
                   {title}
-                  <td>{p.listing.org}</td>
+                  {org}
                   <td>{p.listing.location}</td>
                   {deadline}
                   <td>{p.term}</td>
-                  <td>{p.details || p.score ? 'Yes' : 'No'}</td>
+                  <td>{p.details || p.score ? 'Yes' : <span className="faint">No</span>}</td>
                   <td className="nowrap">{formatDate(p.firstSeen)}</td>
-                  <td>{p.onScopeNow ? 'Yes' : 'No'}</td>
+                  <td>{p.onScopeNow ? 'Yes' : <span className="faint">No</span>}</td>
                 </>
               )}
             </tr>

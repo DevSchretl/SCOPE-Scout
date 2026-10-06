@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { X } from 'lucide-react'
 import { CLAUDE_MODELS, PROVIDERS, presetOf } from '../../../shared/config'
 import type { JsonMode, ProviderId, ProviderUpdate, SettingsView } from '../../../shared/types'
 
@@ -60,6 +61,17 @@ export default function Settings({ initial, onClose, onSaved }: Props): React.JS
   const [check, setCheck] = useState('')
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    // Capture, so Esc closes Settings and not a posting drawer behind it.
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key !== 'Escape') return
+      e.stopPropagation()
+      onClose()
+    }
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
+  }, [onClose])
+
   const preset = presetOf(provider)
   const d = drafts[provider]
   const hasKey = initial.providers[provider].hasKey && !d.removeKey
@@ -116,138 +128,177 @@ export default function Settings({ initial, onClose, onSaved }: Props): React.JS
   const modelOptions = [...new Set([...preset.models, ...models])]
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Settings</h2>
+    <div className="modal-backdrop" onMouseDown={onClose}>
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <header className="modal-head">
+          <h2 id="settings-title">Settings</h2>
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={onClose}
+            aria-label="Close"
+            title="Close"
+          >
+            <X size={18} />
+          </button>
+        </header>
 
-        <label>
-          AI provider
-          <select value={provider} onChange={(e) => choose(e.target.value as ProviderId)}>
-            {PROVIDERS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <p className="hint">{HINTS[provider]}</p>
+        <div className="modal-body">
+          <section className="form-section">
+            <h3>AI provider</h3>
+            <label>
+              Provider
+              <select value={provider} onChange={(e) => choose(e.target.value as ProviderId)}>
+                {PROVIDERS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="hint">{HINTS[provider]}</p>
 
-        {preset.kind === 'openai' && (
-          <label>
-            Server URL
-            <input
-              value={d.baseUrl}
-              placeholder="http://localhost:1234/v1"
-              onChange={(e) => edit({ baseUrl: e.target.value })}
-            />
-          </label>
-        )}
-
-        <label>
-          API key
-          <input
-            type="password"
-            value={d.apiKey}
-            autoComplete="off"
-            placeholder={keyPlaceholder}
-            onChange={(e) => edit({ apiKey: e.target.value })}
-          />
-        </label>
-        <p className="hint">
-          {preset.keyHint} Keys are stored encrypted on this PC with Windows DPAPI.
-          {hasKey && (
-            <button className="link" onClick={() => edit({ removeKey: true, apiKey: '' })}>
-              Remove saved key
-            </button>
-          )}
-          {d.removeKey && ' The saved key will be removed when you save.'}
-        </p>
-
-        <label>
-          Model
-          {preset.kind === 'anthropic' ? (
-            <select value={d.model} onChange={(e) => edit({ model: e.target.value })}>
-              {CLAUDE_MODELS.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.label} (${m.input} / ${m.output} per million tokens)
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              list="model-options"
-              value={d.model}
-              placeholder="Model id, e.g. qwen2.5-14b-instruct"
-              onChange={(e) => edit({ model: e.target.value })}
-            />
-          )}
-        </label>
-        <datalist id="model-options">
-          {modelOptions.map((m) => (
-            <option key={m} value={m} />
-          ))}
-        </datalist>
-
-        {preset.kind === 'openai' && (
-          <>
-            <div className="row">
-              <button onClick={checkConnection} disabled={!d.baseUrl.trim()}>
-                Check connection
-              </button>
-              <span className="muted">{check}</span>
-            </div>
-            <div className="grid3">
+            {preset.kind === 'openai' && (
               <label>
-                JSON mode
-                <select
-                  value={d.jsonMode}
-                  onChange={(e) => edit({ jsonMode: e.target.value as JsonMode })}
+                Server URL
+                <input
+                  value={d.baseUrl}
+                  placeholder="http://localhost:1234/v1"
+                  onChange={(e) => edit({ baseUrl: e.target.value })}
+                />
+              </label>
+            )}
+
+            <label>
+              API key
+              <input
+                type="password"
+                value={d.apiKey}
+                autoComplete="off"
+                placeholder={keyPlaceholder}
+                onChange={(e) => edit({ apiKey: e.target.value })}
+              />
+            </label>
+            <p className="hint">
+              {preset.keyHint} Keys are stored encrypted on this PC with Windows DPAPI.
+              {hasKey && (
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => edit({ removeKey: true, apiKey: '' })}
                 >
-                  {JSON_MODES.map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
+                  Remove saved key
+                </button>
+              )}
+              {d.removeKey && ' The saved key will be removed when you save.'}
+            </p>
+
+            <label>
+              Model
+              {preset.kind === 'anthropic' ? (
+                <select value={d.model} onChange={(e) => edit({ model: e.target.value })}>
+                  {CLAUDE_MODELS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.label} (${m.input} / ${m.output} per million tokens)
                     </option>
                   ))}
                 </select>
-              </label>
-              <label>
-                Input $ per M tokens
+              ) : (
                 <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={d.inputPrice}
-                  onChange={(e) => edit({ inputPrice: e.target.value })}
+                  list="model-options"
+                  value={d.model}
+                  placeholder="Model id, e.g. qwen2.5-14b-instruct"
+                  onChange={(e) => edit({ model: e.target.value })}
                 />
-              </label>
-              <label>
-                Output $ per M tokens
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={d.outputPrice}
-                  onChange={(e) => edit({ outputPrice: e.target.value })}
-                />
-              </label>
-            </div>
-          </>
-        )}
+              )}
+            </label>
+            <datalist id="model-options">
+              {modelOptions.map((m) => (
+                <option key={m} value={m} />
+              ))}
+            </datalist>
 
-        <label>
-          Your profile
-          <textarea rows={14} value={profile} onChange={(e) => setProfile(e.target.value)} />
-        </label>
-        <p className="hint">
-          The scorer only counts what is listed here as met: your year and grad date, programs,
-          skills you have (with the project that proves each), skills you don&apos;t have, and where
-          you can work.
-        </p>
+            {preset.kind === 'openai' && (
+              <>
+                <div className="row">
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={checkConnection}
+                    disabled={!d.baseUrl.trim()}
+                  >
+                    Check connection
+                  </button>
+                  <span className="muted">{check}</span>
+                </div>
+                <div className="grid3">
+                  <label>
+                    JSON mode
+                    <select
+                      value={d.jsonMode}
+                      onChange={(e) => edit({ jsonMode: e.target.value as JsonMode })}
+                    >
+                      {JSON_MODES.map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Input $ per M tokens
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={d.inputPrice}
+                      onChange={(e) => edit({ inputPrice: e.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Output $ per M tokens
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={d.outputPrice}
+                      onChange={(e) => edit({ outputPrice: e.target.value })}
+                    />
+                  </label>
+                </div>
+              </>
+            )}
+          </section>
 
-        {error && <p className="error">{error}</p>}
-        <footer>
-          <button onClick={onClose}>Cancel</button>
-          <button className="primary" onClick={save}>
+          <section className="form-section">
+            <h3>Your profile</h3>
+            <textarea
+              rows={14}
+              aria-label="Your profile"
+              value={profile}
+              onChange={(e) => setProfile(e.target.value)}
+            />
+            <p className="hint">
+              The scorer only counts what is listed here as met: your year and grad date, programs,
+              skills you have (with the project that proves each), skills you don&apos;t have, and
+              where you can work.
+            </p>
+          </section>
+
+          {error && <p className="error-text">{error}</p>}
+        </div>
+
+        <footer className="modal-foot">
+          <button type="button" className="btn" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="button" className="btn primary" onClick={save}>
             Save
           </button>
         </footer>

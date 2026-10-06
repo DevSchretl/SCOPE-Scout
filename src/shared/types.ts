@@ -164,6 +164,8 @@ export type ModelList = { ok: true; models: string[] } | { ok: false; error: str
 export interface AppData {
   postings: Posting[]
   lastRun: RunRecord | null
+  /** Every stored scan, newest last. */
+  runs: RunRecord[]
   scanning: boolean
 }
 

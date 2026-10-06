@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, Notification, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme, Notification, shell } from 'electron'
 import { join } from 'path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -33,6 +33,10 @@ function createWindow(): void {
     show: false,
     title: 'SCOPE Scout',
     autoHideMenuBar: true,
+    // The app's navy nav bar is the title bar; Windows draws its buttons over the right end.
+    titleBarStyle: 'hidden',
+    titleBarOverlay: { color: '#002145', symbolColor: '#ffffff', height: 48 },
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#0b1422' : '#f4f6fa',
     icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -77,6 +81,7 @@ function registerIpc(): void {
   ipcMain.handle('data:get', (): AppData => ({
     postings: Object.values(getStore().postings),
     lastRun: getStore().runs.at(-1) ?? null,
+    runs: getStore().runs,
     scanning: isScanning()
   }))
 

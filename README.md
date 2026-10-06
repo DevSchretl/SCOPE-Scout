@@ -15,7 +15,8 @@ the results in its own tables. It replaces the old Claude desktop scheduled task
    python tools/import_workbook.py
    ```
 3. `npm run dev` to start the app.
-4. **Settings**: pick an AI provider, add its key and model (see below) and check the profile.
+4. **Settings** (the gear at the top right): pick an AI provider, add its key and model (see below)
+   and check the profile.
    The profile is what the scorer counts as "met", so update it when you learn something new.
 5. **Open SCOPE**: log in with your CWL and Duo in that window, then close it. The app keeps the
    session, but SCOPE logs you out after a while; the app then says "SCOPE login needed".
@@ -39,7 +40,16 @@ models. Small local models (under about 7B parameters) often get the scoring for
 
 ## Daily use
 
-Press **Scan now**. One scan:
+The navy bar at the top switches between three pages (or press Ctrl+1, 2 or 3):
+
+- **Home**: **Scan now**, **Open SCOPE**, which AI provider to use, and the latest scan's summary.
+- **Postings**: the old workbook's sheets (a picks sheet per quick search, Near misses, In progress
+  and All postings), chosen from the dropdown at the top left. **Filter** narrows a sheet by match,
+  fit, organization, location, province, deadline, your status and more. Each sheet keeps its own
+  filters, even after a restart. Click a row to read the posting.
+- **Past runs**: every scan's summary, newest first, with what it cost.
+
+Press **Scan now** on Home. One scan:
 
 1. Opens each quick search in `src/shared/config.ts` and reads every results page, refreshing
    deadlines, applicant counts and SCOPE's application status.
@@ -48,10 +58,10 @@ Press **Scan now**. One scan:
 3. Reads those postings on SCOPE, one every 0.6 seconds.
 4. Scores each one with the rubric in `src/main/prompts.ts` (from the old `reader_brief.md`).
 5. Shows a summary (new picks rated 7/10+, good picks closing within 3 days, anything odd, cost)
-   and a Windows notification.
+   on Home and in Past runs, and a Windows notification.
 
 Set **Status** on any posting (To apply, Drafting, Applied, Skip). Drafting and Applied move it to
-In progress, as does any application SCOPE shows. The search box covers the old RBC tab.
+In progress, as does any application SCOPE shows. **Find in this sheet** covers the old RBC tab.
 
 **Match /10** uses the workbook's formula: 10 x (0.45 x required share squared + 0.15 x preferred
 share + 0.40 x (fit - 1) / 4), minus a competition penalty (10+ applicants -0.5, 30+ -1, 60+ -1.5)
@@ -93,13 +103,13 @@ npm run build:win  # Windows installer (not needed for daily use)
 
 | File | Job |
 | --- | --- |
-| `src/shared/` | Types, config and pure functions (match score, sections, parsing) used everywhere |
+| `src/shared/` | Types, config and pure functions (match score, sections, parsing, sheets, filters) used everywhere |
 | `src/main/scan.ts` | The scan pipeline |
 | `src/main/scope.ts`, `scope-inpage.js` | The SCOPE window and the code that runs inside SCOPE pages |
 | `src/main/ai.ts`, `prompts.ts` | Provider-neutral AI layer (JSON checking, retries, cost) and prompts |
 | `src/main/providers/` | `anthropic.ts` for Claude, `openai.ts` for DeepSeek, LM Studio and other OpenAI-style servers |
 | `src/main/store.ts`, `settings.ts` | Local storage |
-| `src/renderer/src/` | The React UI |
+| `src/renderer/src/` | The React UI: `pages/` (Home, Postings, Past runs) and `components/` |
 | `tools/import_workbook.py` | One-time import from the old workbook |
 
 During `npm run dev`, every POST the SCOPE window sends to SCOPE is printed in the terminal as

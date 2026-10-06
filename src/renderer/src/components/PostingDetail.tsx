@@ -1,7 +1,17 @@
+import {
+  Building2,
+  CalendarClock,
+  CalendarDays,
+  Hash,
+  MapPin,
+  TriangleAlert,
+  X
+} from 'lucide-react'
+import { DUE_SOON_DAYS } from '../../../shared/config'
 import { competitionLabel, daysLeft, postingMatch, reqMatchText } from '../../../shared/derive'
 import type { MyStatus, Posting } from '../../../shared/types'
 import { formatDate, formatDateTime, formatDays, formatDeadline } from '../format'
-import { MatchBadge, StatusSelect } from './PostingTable'
+import { MatchBadge, StatusSelect } from './Badges'
 
 interface Props {
   posting: Posting
@@ -44,7 +54,7 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
     const ib = FIELD_ORDER.indexOf(b)
     return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib)
   })
-  const facts: [string, string | undefined][] = [
+  const allFacts: [string, string | undefined][] = [
     ['Apply via', s?.applyVia],
     ['Cover letter', s?.coverLetter],
     ['Salary', s?.salary],
@@ -67,37 +77,72 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
         : undefined
     ]
   ]
+  const facts = allFacts.filter(([, v]) => v)
+  const closesClass =
+    days === null ? 'chip' : days < 0 ? 'chip closed' : days <= DUE_SOON_DAYS ? 'chip soon' : 'chip'
 
   return (
-    <aside className="detail">
-      <header>
-        <div>
+    <article className="detail">
+      <header className="detail-head">
+        <div className="detail-title">
+          {!p.onScopeNow && <span className="tag muted">No longer on SCOPE</span>}
           <h2>{p.listing.title}</h2>
-          <div className="sub">
-            {p.listing.org} · {p.listing.location} · ID {p.id} · {p.term}
-            {!p.onScopeNow && ' · no longer on SCOPE'}
+          <div className="meta">
+            <span>
+              <Building2 size={14} />
+              {p.listing.org}
+            </span>
+            <span>
+              <MapPin size={14} />
+              {p.listing.location}
+            </span>
+            <span title="SCOPE job ID">
+              <Hash size={14} />
+              {p.id}
+            </span>
+            <span title="Term">
+              <CalendarDays size={14} />
+              {p.term}
+            </span>
           </div>
         </div>
-        <button className="icon" onClick={onClose} aria-label="Close">
-          ×
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={onClose}
+          aria-label="Close"
+          title="Close"
+        >
+          <X size={18} />
         </button>
       </header>
 
-      <div className="chips">
-        <MatchBadge value={postingMatch(p)} />
+      <div className="detail-chips">
+        <MatchBadge value={postingMatch(p)} large />
         {s?.fit !== undefined && <span className="chip">Fit {s.fit}/5</span>}
         {reqMatchText(s) && <span className="chip">{reqMatchText(s)}</span>}
-        <span className="chip">
+        <span className={closesClass}>
+          <CalendarClock size={14} />
           Closes {formatDeadline(p.listing.deadline, p.listing.deadlineText || 'unknown')}
           {days !== null && ` (${formatDays(days)}${days >= 0 ? ' days' : ''})`}
         </span>
-        <label className="chip">
+        <label className="chip status-chip">
           Status <StatusSelect posting={p} onStatus={onStatus} />
         </label>
       </div>
 
-      {p.fetchError && <p className="error">Could not read this posting: {p.fetchError}</p>}
-      {p.scoreError && <p className="error">Could not score this posting: {p.scoreError}</p>}
+      {p.fetchError && (
+        <div className="alert danger">
+          <TriangleAlert size={16} />
+          <p>Could not read this posting: {p.fetchError}</p>
+        </div>
+      )}
+      {p.scoreError && (
+        <div className="alert danger">
+          <TriangleAlert size={16} />
+          <p>Could not score this posting: {p.scoreError}</p>
+        </div>
+      )}
 
       {s?.specialInstructions && (
         <section className={s.plantedInstruction ? 'callout warn' : 'callout'}>
@@ -110,13 +155,13 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
         </section>
       )}
       {s?.whyItFits && (
-        <section>
+        <section className="detail-section">
           <h3>Why it fits</h3>
           <p>{s.whyItFits}</p>
         </section>
       )}
       {s?.whyMissed && (
-        <section>
+        <section className="detail-section">
           <h3>Why it missed</h3>
           <p>{s.whyMissed}</p>
         </section>
@@ -125,7 +170,7 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
         s?.preferredMissing?.length ||
         s?.gaps ||
         s?.eligibilityFlags?.length) && (
-        <section>
+        <section className="detail-section">
           <h3>Gaps</h3>
           {s?.gaps && <p>{s.gaps}</p>}
           <List title="Missing required" items={s?.requiredMissing} />
@@ -134,18 +179,18 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
         </section>
       )}
 
-      <dl className="facts">
-        {facts
-          .filter(([, v]) => v)
-          .map(([k, v]) => (
+      {facts.length > 0 && (
+        <dl className="facts">
+          {facts.map(([k, v]) => (
             <div key={k}>
               <dt>{k}</dt>
               <dd>{v}</dd>
             </div>
           ))}
-      </dl>
+        </dl>
+      )}
 
-      <section>
+      <section className="detail-section">
         <h3>Full posting</h3>
         {fields.length ? (
           fields.map(([k, v]) => (
@@ -155,9 +200,9 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
             </div>
           ))
         ) : (
-          <p className="muted">Not read in full.</p>
+          <p className="faint">Not read in full.</p>
         )}
       </section>
-    </aside>
+    </article>
   )
 }

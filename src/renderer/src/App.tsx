@@ -1,73 +1,50 @@
-import { useEffect, useMemo, useState } from 'react'
-import { QUICK_SEARCHES } from '../../shared/config'
-import { comparePicks, sectionOf } from '../../shared/derive'
-import type { AppData, MyStatus, Posting, ScopeStatus, SettingsView } from '../../shared/types'
+import { useEffect, useState } from 'react'
+import type {
+  AppData,
+  MyStatus,
+  Posting,
+  ProviderId,
+  ScopeStatus,
+  SettingsView
+} from '../../shared/types'
 import PostingDetail from './components/PostingDetail'
-import PostingTable, { type TableKind } from './components/PostingTable'
-import RunSummary from './components/RunSummary'
 import Settings from './components/Settings'
-import { formatDateTime } from './format'
+import TopNav, { type View } from './components/TopNav'
+import HomePage from './pages/HomePage'
+import PostingsPage from './pages/PostingsPage'
+import RunsPage from './pages/RunsPage'
 
-interface Tab {
-  id: string
-  label: string
-  kind: TableKind
-  filter: (p: Posting) => boolean
-  sort: (a: Posting, b: Posting) => number
-}
+/** Ctrl+1, 2 and 3 switch pages. */
+const NAV_KEYS: Record<string, View> = { '1': 'home', '2': 'postings', '3': 'runs' }
 
-const termOrder = (p: Posting): number => {
-  const i = QUICK_SEARCHES.findIndex((q) => q.term === p.term)
-  return i < 0 ? 99 : i
-}
-const byDeadline = (a: Posting, b: Posting): number =>
-  (a.listing.deadline ?? '9999').localeCompare(b.listing.deadline ?? '9999')
-
-// Same tabs as the old workbook. Search covers the old RBC tab.
-const TABS: Tab[] = [
-  ...QUICK_SEARCHES.map((qs): Tab => ({
-    id: `pick-${qs.term}`,
-    label: qs.label,
-    kind: 'picks',
-    filter: (p) => sectionOf(p) === 'pick' && p.term === qs.term,
-    sort: comparePicks
-  })),
-  {
-    id: 'near',
-    label: 'Near misses',
-    kind: 'near',
-    filter: (p) => sectionOf(p) === 'near',
-    sort: (a, b) => (b.score?.scoredAt ?? '').localeCompare(a.score?.scoredAt ?? '')
-  },
-  {
-    id: 'inprog',
-    label: 'In progress',
-    kind: 'inprog',
-    filter: (p) => sectionOf(p) === 'inprog',
-    sort: (a, b) => a.listing.org.localeCompare(b.listing.org) || byDeadline(a, b)
-  },
-  {
-    id: 'all',
-    label: 'All postings',
-    kind: 'all',
-    filter: () => true,
-    sort: (a, b) => termOrder(a) - termOrder(b) || byDeadline(a, b)
-  }
-]
-
-const SCOPE_LABEL: Record<ScopeStatus, string> = {
-  unknown: 'SCOPE: not checked',
-  checking: 'SCOPE: checking...',
-  'logged-in': 'SCOPE: logged in',
-  'login-needed': 'SCOPE: login needed',
-  error: 'SCOPE: unreachable'
-}
-
-function matches(p: Posting, q: string): boolean {
-  if (!q) return true
-  const l = p.listing
-  return [p.id, l.title, l.org, l.location, p.score?.city ?? ''].some((s) =>
-    s.toLowerCase().includes(q)
+/** A posting opened from Home or Past runs slides in over the page. */
+function Drawer({
+  posting,
+  onClose,
+  onStatus
+}: {
+  posting: Posting
+  onClose: () => void
+  onStatus: (id: string, status: MyStatus) => void
+}): React.JSX.Element {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div className="drawer-backdrop" onMouseDown={onClose}>
+      <aside
+        className="drawer"
+        role="dialog"
+        aria-label={posting.listing.title}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <PostingDetail posting={posting} onClose={onClose} onStatus={onStatus} />
+      </aside>
+    </div>
   )
 }
 
@@ -77,11 +54,9 @@ export default function App(): React.JSX.Element {
   const [scanning, setScanning] = useState(false)
   const [progress, setProgress] = useState('')
   const [scope, setScope] = useState<ScopeStatus>('checking')
-  const [tabId, setTabId] = useState(TABS[0].id)
-  const [query, setQuery] = useState('')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [view, setView] = useState<View>('home')
+  const [drawerId, setDrawerId] = useState<string | null>(null)
   const [showSettings, setShowSettings] = useState(false)
-  const [showSummary, setShowSummary] = useState(true)
 
   useEffect(() => {
     const load = async (): Promise<void> => {
@@ -98,24 +73,28 @@ export default function App(): React.JSX.Element {
       window.api.onScanDone(() => {
         setScanning(false)
         setProgress('')
-        setShowSummary(true)
         void load()
       })
     ]
     return () => offs.forEach((off) => off())
   }, [])
 
-  const tab = TABS.find((t) => t.id === tabId) ?? TABS[0]
-  const q = query.trim().toLowerCase()
-  const counts = useMemo(
-    () => Object.fromEntries(TABS.map((t) => [t.id, data?.postings.filter(t.filter).length ?? 0])),
-    [data]
-  )
-  const rows = useMemo(
-    () => (data?.postings ?? []).filter((p) => tab.filter(p) && matches(p, q)).sort(tab.sort),
-    [data, tab, q]
-  )
-  const selected = data?.postings.find((p) => p.id === selectedId) ?? null
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (!e.ctrlKey || e.altKey || e.shiftKey || e.metaKey || !Object.hasOwn(NAV_KEYS, e.key))
+        return
+      e.preventDefault()
+      setView(NAV_KEYS[e.key])
+      setDrawerId(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  function navigate(next: View): void {
+    setView(next)
+    setDrawerId(null)
+  }
 
   async function scan(): Promise<void> {
     const res = await window.api.startScan()
@@ -136,103 +115,55 @@ export default function App(): React.JSX.Element {
     )
   }
 
-  function select(id: string): void {
-    setSelectedId(id)
-    setQuery('')
-    const p = data?.postings.find((x) => x.id === id)
-    const home = p && TABS.find((t) => t.filter(p) && t.id !== 'all')
-    setTabId(home ? home.id : 'all')
+  async function chooseProvider(id: ProviderId): Promise<void> {
+    try {
+      setSettings(await window.api.saveSettings({ provider: id }))
+    } catch (e) {
+      setProgress(`Could not switch the AI provider: ${e instanceof Error ? e.message : String(e)}`)
+    }
   }
 
-  const lastRun = data?.lastRun ?? null
-  const needsSetup = settings?.problem
+  const drawerPosting = drawerId ? (data?.postings.find((p) => p.id === drawerId) ?? null) : null
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <span className="brand">SCOPE Scout</span>
-        <button className="primary" onClick={scan} disabled={scanning || !!needsSetup}>
-          {scanning ? 'Scanning...' : 'Scan now'}
-        </button>
-        <span className="progress">{progress}</span>
-        <span className="spacer" />
-        {lastRun && <span className="muted">Last scan {formatDateTime(lastRun.finishedAt)}</span>}
-        <span className={`scope-chip ${scope}`}>{SCOPE_LABEL[scope]}</span>
-        <button onClick={() => window.api.openScope()} disabled={scanning}>
-          Open SCOPE
-        </button>
-        <button onClick={() => setShowSettings(true)}>Settings</button>
-      </header>
+    <div className={showSettings ? 'app modal-open' : 'app'}>
+      <TopNav
+        view={view}
+        onNavigate={navigate}
+        scanning={scanning}
+        progress={progress}
+        scope={scope}
+        onOpenScope={() => window.api.openScope()}
+        onOpenSettings={() => setShowSettings(true)}
+      />
 
-      {needsSetup && (
-        <div className="banner">
-          {needsSetup}{' '}
-          <button className="link" onClick={() => setShowSettings(true)}>
-            Open Settings
-          </button>
-        </div>
-      )}
-      {scope === 'login-needed' && !scanning && (
-        <div className="banner">
-          SCOPE needs you to log in.{' '}
-          <button className="link" onClick={() => window.api.openScope()}>
-            Open SCOPE
-          </button>{' '}
-          and sign in with your CWL, then close that window.
-        </div>
-      )}
-      {showSummary && lastRun && (
-        <RunSummary run={lastRun} onSelect={select} onClose={() => setShowSummary(false)} />
-      )}
-
-      <nav className="tabs">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={t.id === tab.id ? 'active' : ''}
-            onClick={() => setTabId(t.id)}
-          >
-            {t.label} <span className="count">{counts[t.id]}</span>
-          </button>
-        ))}
-        <input
-          type="search"
-          placeholder="Search title, organization, city or ID"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+      {view === 'home' && (
+        <HomePage
+          data={data}
+          settings={settings}
+          scanning={scanning}
+          progress={progress}
+          scope={scope}
+          onScan={scan}
+          onOpenScope={() => window.api.openScope()}
+          onOpenSettings={() => setShowSettings(true)}
+          onChooseProvider={chooseProvider}
+          onOpenPosting={setDrawerId}
+          onSeeRuns={() => navigate('runs')}
         />
-      </nav>
+      )}
+      {view === 'postings' && <PostingsPage data={data} onStatus={changeStatus} />}
+      {view === 'runs' && <RunsPage runs={data?.runs ?? []} onOpenPosting={setDrawerId} />}
 
-      <main className={selected ? 'content with-detail' : 'content'}>
-        <div className="table-wrap">
-          {data ? (
-            <PostingTable
-              rows={rows}
-              kind={tab.kind}
-              lastRun={lastRun}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              onStatus={changeStatus}
-            />
-          ) : (
-            <p className="empty">Loading...</p>
-          )}
-        </div>
-        {selected && (
-          <PostingDetail
-            posting={selected}
-            onClose={() => setSelectedId(null)}
-            onStatus={changeStatus}
-          />
-        )}
-      </main>
-
+      {drawerPosting && (
+        <Drawer posting={drawerPosting} onClose={() => setDrawerId(null)} onStatus={changeStatus} />
+      )}
       {showSettings && settings && (
         <Settings
           initial={settings}
           onClose={() => setShowSettings(false)}
-          onSaved={(view) => {
-            setSettings(view)
+          onSaved={(saved) => {
+            setSettings(saved)
             setShowSettings(false)
           }}
         />
