@@ -1,9 +1,10 @@
-// All Claude API calls live here, so another provider would only touch this file.
+// The provider-neutral AI layer: prompts go in, validated JSON comes out. Each API's request
+// format lives in providers/ (Claude in anthropic.ts, everything else in openai.ts).
 
 import Anthropic from '@anthropic-ai/sdk'
-import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
+import OpenAI from 'openai'
 import * as z from 'zod'
-import { MODELS, SCORE_EFFORT, TRIAGE_EFFORT, type QuickSearch } from '../shared/config'
+import { SCORE_EFFORT, TRIAGE_EFFORT, type QuickSearch } from '../shared/config'
 import type { Posting, Score, Usage } from '../shared/types'
 import {
   scoringSystemPrompt,
@@ -13,7 +14,35 @@ import {
   type TriageRow
 } from './prompts'
 
-const ScoreOutput = z.object({
+export interface ProviderRequest {
+  system: string
+  user: string
+  schema: z.ZodType
+  /** Short name for the answer format ("score", "triage"). */
+  schemaName: string
+  effort: 'low' | 'medium'
+}
+
+export interface ProviderReply {
+  text: string
+  usage: Usage
+  /** Set when the model declined to answer. */
+  refusal?: string
+  /** True when the answer hit the output token limit. */
+  truncated?: boolean
+}
+
+export interface Provider {
+  /** Model id stored with each score. */
+  readonly model: string
+  /** Shown in the scan summary, e.g. "DeepSeek, deepseek-flash". */
+  readonly label: string
+  /** Scoring requests to send at once. */
+  readonly concurrency: number
+  complete(req: ProviderRequest): Promise<ProviderReply>
+}
+
+export const ScoreOutput = z.object({
   city: z.string(),
   workMode: z.string().describe('"on-site" | "hybrid" | "remote" | "unclear"'),
   duration: z.string(),
@@ -40,35 +69,73 @@ const ScoreOutput = z.object({
 
 const TriageOutput = z.object({ read: z.array(z.string()) })
 
-/** The model declined (stop_reason "refusal") even after the server-side fallback. */
+/** The model declined to answer (after Claude's server-side fallback, if any). */
 export class RefusalError extends Error {}
 
-/** Errors that will repeat on every request (bad key, no credit, unknown model). */
+/** The answer wasn't usable JSON. Asked once more before giving up. */
+class BadAnswerError extends Error {}
+
+/**
+ * Pulls the JSON object out of a model's answer. Local models sometimes wrap it in a code
+ * fence or print their reasoning in <think> tags first.
+ */
+export function extractJson(text: string): unknown {
+  let t = text.replace(/<think>[\s\S]*?<\/think>/gi, '')
+  t = t.replace(/^[\s\S]*<\/think>/i, '') // reasoning whose opening tag the template dropped
+  const fenced = /```(?:json)?\s*([\s\S]*?)```/i.exec(t)
+  if (fenced) t = fenced[1]
+  const start = t.indexOf('{')
+  const end = t.lastIndexOf('}')
+  if (start < 0 || end < start) throw new BadAnswerError('The answer had no JSON object.')
+  try {
+    return JSON.parse(t.slice(start, end + 1))
+  } catch {
+    throw new BadAnswerError('The answer was not valid JSON.')
+  }
+}
+
+const isConnectionError = (e: unknown): boolean =>
+  e instanceof Anthropic.APIConnectionError || e instanceof OpenAI.APIConnectionError
+
+function statusOf(e: unknown): number | undefined {
+  return e instanceof Anthropic.APIError || e instanceof OpenAI.APIError ? e.status : undefined
+}
+
+/** Errors that will repeat on every request (bad key, no credit, wrong model, server down). */
 export function isFatalAiError(e: unknown): boolean {
-  return (
-    e instanceof Anthropic.AuthenticationError ||
-    e instanceof Anthropic.PermissionDeniedError ||
-    e instanceof Anthropic.NotFoundError ||
-    e instanceof Anthropic.BadRequestError
-  )
+  if (isConnectionError(e)) return true
+  const status = statusOf(e)
+  return status !== undefined && [400, 401, 402, 403, 404].includes(status)
 }
 
 export function describeAiError(e: unknown): string {
-  if (e instanceof Anthropic.AuthenticationError)
-    return 'The Claude API key was rejected. Check it in Settings.'
-  if (e instanceof Anthropic.PermissionDeniedError)
-    return 'The Claude API key is not allowed to use this model.'
-  if (e instanceof Anthropic.RateLimitError) return 'Rate limited by the Claude API.'
-  if (e instanceof Anthropic.APIConnectionError) return 'Could not reach the Claude API.'
-  if (e instanceof Anthropic.APIError)
-    return `Claude API error ${e.status ?? ''}: ${e.message}`.trim()
-  return e instanceof Error ? e.message : String(e)
+  const message = e instanceof Error ? e.message : String(e)
+  if (
+    e instanceof Anthropic.APIConnectionTimeoutError ||
+    e instanceof OpenAI.APIConnectionTimeoutError
+  )
+    return 'The AI server took too long to answer.'
+  if (isConnectionError(e))
+    return 'Could not reach the AI server. If you use LM Studio, start its local server and load a model.'
+  const status = statusOf(e)
+  if (status === undefined) return message
+  if (
+    status === 400 &&
+    /context (length|window|size)|n_ctx|too long|maximum context/i.test(message)
+  )
+    return `The model's context window is too small for a posting. In LM Studio, load the model with a context length of at least 8192 tokens (16384 is safer). (${message})`
+  if (status === 401) return 'The API key was rejected. Check it in Settings.'
+  if (status === 402) return 'The AI account is out of credit.'
+  if (status === 403) return 'The API key is not allowed to use this model.'
+  if (status === 404)
+    return `Model or server address not found. Check them in Settings. (${message})`
+  if (status === 429) return 'Rate limited by the AI provider.'
+  return `AI API error ${status}: ${message}`
 }
 
 const clamp = (n: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, n))
 
 export class AiClient {
-  private client: Anthropic
   readonly usage: Usage = {
     inputTokens: 0,
     cacheWriteTokens: 0,
@@ -77,11 +144,14 @@ export class AiClient {
     costUsd: 0
   }
 
-  constructor(
-    apiKey: string,
-    private model: string
-  ) {
-    this.client = new Anthropic({ apiKey, maxRetries: 4 })
+  constructor(private provider: Provider) {}
+
+  get label(): string {
+    return this.provider.label
+  }
+
+  get concurrency(): number {
+    return this.provider.concurrency
   }
 
   /** IDs from one results page worth a full read. */
@@ -93,6 +163,7 @@ export class AiClient {
   ): Promise<Set<string>> {
     const out = await this.call(
       TriageOutput,
+      'triage',
       triageSystemPrompt(profile),
       triageUserMessage(runDate, qs, rows),
       TRIAGE_EFFORT
@@ -104,6 +175,7 @@ export class AiClient {
   async score(runDate: string, profile: string, p: Posting): Promise<Score> {
     const out = await this.call(
       ScoreOutput,
+      'score',
       scoringSystemPrompt(profile),
       scoringUserMessage(runDate, p),
       SCORE_EFFORT
@@ -118,59 +190,40 @@ export class AiClient {
       preferredTotal,
       preferredMet: clamp(out.preferredMet, 0, preferredTotal),
       scoredAt: new Date().toISOString(),
-      model: this.model
+      model: this.provider.model
     }
   }
 
   private async call<T extends z.ZodType>(
     schema: T,
+    schemaName: string,
     system: string,
     user: string,
     effort: 'low' | 'medium'
   ): Promise<z.infer<T>> {
-    const res = await this.client.beta.messages.create({
-      model: this.model,
-      max_tokens: 16000,
-      // A rare false-positive refusal is retried on another model instead of failing.
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-      // The rubric and profile are identical across a scan, so they are cached.
-      system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: user }],
-      output_config: { effort, format: betaZodOutputFormat(schema) }
-    })
-    this.addUsage(res.usage)
-    if (res.stop_reason === 'refusal') {
-      throw new RefusalError(
-        `Claude declined to score this posting (${res.stop_details?.category ?? 'no category'}).`
-      )
+    for (let attempt = 1; ; attempt++) {
+      const reply = await this.provider.complete({ system, user, schema, schemaName, effort })
+      this.addUsage(reply.usage)
+      if (reply.refusal) throw new RefusalError(`The model declined to answer (${reply.refusal}).`)
+      if (reply.truncated) throw new Error('The answer was cut off before it finished.')
+      try {
+        const parsed = schema.safeParse(extractJson(reply.text))
+        if (parsed.success) return parsed.data
+        throw new BadAnswerError(
+          `The answer did not match the expected format: ${parsed.error.message}`
+        )
+      } catch (e) {
+        // Models occasionally slip on the format, so ask once more before giving up.
+        if (!(e instanceof BadAnswerError) || attempt >= 2) throw e
+      }
     }
-    if (res.stop_reason === 'max_tokens')
-      throw new Error('The answer was cut off before it finished.')
-    // After a fallback, the final model's answer is the last text block.
-    const text = res.content.filter((b) => b.type === 'text').at(-1)
-    if (!text || text.type !== 'text') throw new Error('The answer had no text.')
-    const parsed = schema.safeParse(JSON.parse(text.text))
-    if (!parsed.success)
-      throw new Error(`The answer did not match the expected format: ${parsed.error.message}`)
-    return parsed.data
   }
 
-  private addUsage(u: Anthropic.Beta.BetaUsage): void {
-    const price = MODELS.find((m) => m.id === this.model) ?? MODELS[0]
-    const input = u.input_tokens ?? 0
-    const write = u.cache_creation_input_tokens ?? 0
-    const read = u.cache_read_input_tokens ?? 0
-    const output = u.output_tokens ?? 0
-    this.usage.inputTokens += input
-    this.usage.cacheWriteTokens += write
-    this.usage.cacheReadTokens += read
-    this.usage.outputTokens += output
-    this.usage.costUsd +=
-      (input * price.input +
-        write * price.cacheWrite +
-        read * price.cacheRead +
-        output * price.output) /
-      1e6
+  private addUsage(u: Usage): void {
+    this.usage.inputTokens += u.inputTokens
+    this.usage.cacheWriteTokens += u.cacheWriteTokens
+    this.usage.cacheReadTokens += u.cacheReadTokens
+    this.usage.outputTokens += u.outputTokens
+    this.usage.costUsd += u.costUsd
   }
 }

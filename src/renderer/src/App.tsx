@@ -145,7 +145,7 @@ export default function App(): React.JSX.Element {
   }
 
   const lastRun = data?.lastRun ?? null
-  const needsSetup = settings && (!settings.hasKey || !settings.profile.trim())
+  const needsSetup = settings?.problem
 
   return (
     <div className="app">
@@ -166,7 +166,7 @@ export default function App(): React.JSX.Element {
 
       {needsSetup && (
         <div className="banner">
-          Add your Claude API key and profile in Settings to start scanning.{' '}
+          {needsSetup}{' '}
           <button className="link" onClick={() => setShowSettings(true)}>
             Open Settings
           </button>

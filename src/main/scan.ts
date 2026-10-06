@@ -6,8 +6,7 @@ import {
   DUE_SOON_MIN_MATCH,
   FETCH_DELAY_MS,
   NEW_PICK_MIN_MATCH,
-  QUICK_SEARCHES,
-  SCORE_CONCURRENCY
+  QUICK_SEARCHES
 } from '../shared/config'
 import {
   cleanTitle,
@@ -26,8 +25,10 @@ import type {
   SummaryItem
 } from '../shared/types'
 import { AiClient, describeAiError, isFatalAiError } from './ai'
+import { AnthropicProvider } from './providers/anthropic'
+import { OpenAiProvider } from './providers/openai'
 import * as scope from './scope'
-import { getApiKey, getModel } from './settings'
+import { getActiveProvider } from './settings'
 import { backupStore, getStore, saveStore } from './store'
 
 let running = false
@@ -37,6 +38,17 @@ export function isScanning(): boolean {
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
+
+/** An AI client for the provider chosen in Settings; throws when something is missing. */
+function createAi(): AiClient {
+  const { preset, config, apiKey, problem } = getActiveProvider()
+  if (problem) throw new Error(problem)
+  return new AiClient(
+    preset.kind === 'anthropic'
+      ? new AnthropicProvider(config.model, apiKey ?? '')
+      : new OpenAiProvider(preset, config, apiKey)
+  )
+}
 
 /** Today's date in local time, for the prompts ("2026-10-04"). */
 function localDate(d = new Date()): string {
@@ -61,7 +73,6 @@ export async function runScan(progress: (text: string) => void): Promise<RunReco
   const startedAt = new Date().toISOString()
   const runDate = localDate()
   const store = getStore()
-  const model = getModel()
   const notes: string[] = []
   const listedByTerm: Record<string, number> = {}
   const seen = new Set<string>()
@@ -76,10 +87,7 @@ export async function runScan(progress: (text: string) => void): Promise<RunReco
   let aiStopped: string | null = null
 
   try {
-    const apiKey = getApiKey()
-    if (!apiKey) throw new Error('Add your Claude API key in Settings first.')
-    if (!store.profile.trim()) throw new Error('Add your profile in Settings first.')
-    ai = new AiClient(apiKey, model)
+    ai = createAi()
     backupStore()
 
     let listingComplete = true
@@ -228,7 +236,7 @@ export async function runScan(progress: (text: string) => void): Promise<RunReco
     }
     const queue = [...pending]
     await Promise.all(
-      Array.from({ length: SCORE_CONCURRENCY }, async () => {
+      Array.from({ length: ai.concurrency }, async () => {
         while (queue.length) await scoreOne(queue.shift()!)
       })
     )
@@ -282,7 +290,7 @@ export async function runScan(progress: (text: string) => void): Promise<RunReco
     startedAt,
     finishedAt: new Date().toISOString(),
     status,
-    model,
+    model: ai?.label ?? '',
     summary,
     usage: ai?.usage ?? {
       inputTokens: 0,

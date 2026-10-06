@@ -1,7 +1,7 @@
 import {
   DUE_SOON_DAYS,
   DUE_SOON_MIN_MATCH,
-  MODELS,
+  CLAUDE_MODELS,
   NEW_PICK_MIN_MATCH
 } from '../../../shared/config'
 import type { RunRecord, SummaryItem } from '../../../shared/types'
@@ -46,7 +46,7 @@ export default function RunSummary({ run, onSelect, onClose }: Props): React.JSX
   const byTerm = Object.entries(s.listedByTerm)
     .map(([term, n]) => `${term} ${n}`)
     .join(', ')
-  const model = MODELS.find((m) => m.id === run.model)?.label ?? run.model
+  const model = CLAUDE_MODELS.find((m) => m.id === run.model)?.label ?? run.model
   return (
     <section className={`summary ${run.status}`}>
       <header>

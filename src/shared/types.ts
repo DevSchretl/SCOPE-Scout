@@ -119,18 +119,47 @@ export interface StoreData {
   runs: RunRecord[]
 }
 
-export interface SettingsView {
+export type ProviderId = 'anthropic' | 'deepseek' | 'lmstudio' | 'custom'
+
+/**
+ * How an OpenAI-compatible server is asked for JSON: a full JSON Schema (LM Studio, OpenAI,
+ * Ollama), plain JSON mode (DeepSeek), or only the prompt (servers that support neither).
+ */
+export type JsonMode = 'json_schema' | 'json_object' | 'prompt'
+
+/** One provider's settings. Prices are USD per million tokens (OpenAI-compatible providers). */
+export interface ProviderConfig {
   model: string
+  baseUrl: string
+  jsonMode: JsonMode
+  inputPrice: number
+  outputPrice: number
+}
+
+export interface ProviderView extends ProviderConfig {
   hasKey: boolean
+}
+
+export interface SettingsView {
+  provider: ProviderId
+  providers: Record<ProviderId, ProviderView>
   profile: string
+  /** Empty when a scan can run; otherwise what is missing. */
+  problem: string
+}
+
+export interface ProviderUpdate extends Partial<ProviderConfig> {
+  /** A new key to store; an empty string removes the stored key. */
+  apiKey?: string
 }
 
 export interface SettingsUpdate {
-  model?: string
-  /** A new key to store; an empty string removes the stored key. */
-  apiKey?: string
+  provider?: ProviderId
+  providers?: Partial<Record<ProviderId, ProviderUpdate>>
   profile?: string
 }
+
+export type ModelList = { ok: true; models: string[] } | { ok: false; error: string }
 
 export interface AppData {
   postings: Posting[]
@@ -149,6 +178,8 @@ export interface Api {
   checkScope(): Promise<ScopeStatus>
   getSettings(): Promise<SettingsView>
   saveSettings(update: SettingsUpdate): Promise<SettingsView>
+  /** Asks an OpenAI-compatible server which models it has (doubles as a connection test). */
+  listModels(provider: ProviderId, baseUrl: string, apiKey: string): Promise<ModelList>
   onProgress(cb: (text: string) => void): () => void
   onScanDone(cb: (run: RunRecord) => void): () => void
   onScopeStatus(cb: (status: ScopeStatus) => void): () => void

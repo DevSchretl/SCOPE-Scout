@@ -2,16 +2,20 @@ import { app, BrowserWindow, dialog, ipcMain, Notification, shell } from 'electr
 import { join } from 'path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { PROVIDERS } from '../shared/config'
 import {
   MY_STATUSES,
   type AppData,
+  type ModelList,
   type MyStatus,
   type RunRecord,
   type SettingsUpdate
 } from '../shared/types'
+import { describeAiError } from './ai'
+import { listModels } from './providers/openai'
 import { isScanning, runScan } from './scan'
 import { checkScope, initScope, showScope } from './scope'
-import { getSettingsView, updateSettings } from './settings'
+import { getSettingsView, storedApiKey, updateSettings } from './settings'
 import { getStore, saveStore, storePath } from './store'
 
 let mainWindow: BrowserWindow | null = null
@@ -100,14 +104,26 @@ function registerIpc(): void {
   ipcMain.handle('scope:check', () => checkScope())
 
   ipcMain.handle('settings:get', () => getSettingsView())
-  ipcMain.handle('settings:save', (_e, update: unknown) => {
-    const u = (update ?? {}) as Record<string, unknown>
-    const clean: SettingsUpdate = {}
-    if (typeof u.model === 'string') clean.model = u.model
-    if (typeof u.apiKey === 'string') clean.apiKey = u.apiKey
-    if (typeof u.profile === 'string') clean.profile = u.profile
-    return updateSettings(clean)
-  })
+  // updateSettings checks each field itself.
+  ipcMain.handle('settings:save', (_e, update: unknown) =>
+    updateSettings(update && typeof update === 'object' ? (update as SettingsUpdate) : {})
+  )
+
+  ipcMain.handle(
+    'ai:listModels',
+    async (_e, provider: unknown, baseUrl: unknown, apiKey: unknown): Promise<ModelList> => {
+      const preset = PROVIDERS.find((p) => p.id === provider)
+      if (!preset || preset.kind !== 'openai' || typeof baseUrl !== 'string' || !baseUrl.trim()) {
+        return { ok: false, error: 'Enter the server URL first.' }
+      }
+      const key = (typeof apiKey === 'string' && apiKey.trim()) || storedApiKey(preset.id)
+      try {
+        return { ok: true, models: await listModels(baseUrl.trim(), key) }
+      } catch (e) {
+        return { ok: false, error: describeAiError(e) }
+      }
+    }
+  )
 }
 
 app.whenReady().then(() => {

@@ -15,6 +15,8 @@ const api: Api = {
   checkScope: () => ipcRenderer.invoke('scope:check'),
   getSettings: () => ipcRenderer.invoke('settings:get'),
   saveSettings: (update) => ipcRenderer.invoke('settings:save', update),
+  listModels: (provider, baseUrl, apiKey) =>
+    ipcRenderer.invoke('ai:listModels', provider, baseUrl, apiKey),
   onProgress: (cb) => subscribe('scan:progress', cb),
   onScanDone: (cb) => subscribe('scan:done', cb),
   onScopeStatus: (cb) => subscribe('scope:status', cb)

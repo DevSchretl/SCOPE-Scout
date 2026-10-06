@@ -1,8 +1,9 @@
 # SCOPE Scout
 
 A Windows desktop app that scans the UBC Science Co-op job board (SCOPE), finds postings that are
-new since the last scan, uses the Claude API to pick and score the software/ML ones against your
-profile, and shows the results in its own tables. It replaces the old Claude desktop scheduled task
+new since the last scan, uses an AI model (Claude, DeepSeek, a local model in LM Studio, or any
+OpenAI-compatible server) to pick and score the software/ML ones against your profile, and shows
+the results in its own tables. It replaces the old Claude desktop scheduled task
 (`Downloads\scope_scout\RUNBOOK.md`).
 
 ## First-time setup
@@ -14,10 +15,27 @@ profile, and shows the results in its own tables. It replaces the old Claude des
    python tools/import_workbook.py
    ```
 3. `npm run dev` to start the app.
-4. **Settings**: paste your Claude API key (console.anthropic.com), pick a model and check the
-   profile. The profile is what the scorer counts as "met", so update it when you learn something new.
+4. **Settings**: pick an AI provider, add its key and model (see below) and check the profile.
+   The profile is what the scorer counts as "met", so update it when you learn something new.
 5. **Open SCOPE**: log in with your CWL and Duo in that window, then close it. The app keeps the
    session, but SCOPE logs you out after a while; the app then says "SCOPE login needed".
+
+## AI providers
+
+Each provider keeps its own settings, so you can switch back and forth.
+
+| Provider | Server URL | Key | Notes |
+| --- | --- | --- | --- |
+| Claude | (built in) | console.anthropic.com | Structured output and prompt caching built in. |
+| DeepSeek | `https://api.deepseek.com` | platform.deepseek.com | `deepseek-flash` (cheap) or `deepseek-v4-pro`. JSON mode "JSON object". |
+| LM Studio | `http://localhost:1234/v1` | none | Start the server in the Developer tab, load a model with a context length of at least 8192, then **Check connection** to pick it. |
+| Other | e.g. Ollama `http://localhost:11434/v1`, OpenRouter `https://openrouter.ai/api/v1` | if the server needs one | Try another JSON mode if scoring fails with a format error. |
+
+**JSON mode** says how the server is asked for JSON: a full JSON schema (LM Studio, Ollama,
+OpenAI), plain JSON (DeepSeek), or only the prompt (anything else). Every mode also puts the schema in
+the prompt, and the app retries once when a model's answer isn't valid JSON. Prices in Settings
+(USD per million tokens) only feed the cost shown in the scan summary; leave them at 0 for local
+models. Small local models (under about 7B parameters) often get the scoring format wrong.
 
 ## Daily use
 
@@ -25,7 +43,7 @@ Press **Scan now**. One scan:
 
 1. Opens each quick search in `src/shared/config.ts` and reads every results page, refreshing
    deadlines, applicant counts and SCOPE's application status.
-2. Sends the titles of new postings to Claude, which picks the ones worth a full read (S27 has a
+2. Sends the titles of new postings to the AI, which picks the ones worth a full read (S27 has a
    stricter bar).
 3. Reads those postings on SCOPE, one every 0.6 seconds.
 4. Scores each one with the rubric in `src/main/prompts.ts` (from the old `reader_brief.md`).
@@ -44,10 +62,10 @@ and -0.5 for a thin description, rounded to 0.5.
 - **Read-only on SCOPE.** `src/main/scope-inpage.js` only clicks quick-search and page links and
   opens postings through the job-title view link. Nothing applies, shortlists or marks anything.
 - **Your password never touches the app.** You log in yourself in the SCOPE window.
-- **Posting text is data.** Claude gets each posting as escaped JSON, has no tools, and must answer
-  in a fixed JSON format. Planted "AI check" instructions are flagged, not followed.
-- **No downloads**, and data stays on this PC. Only posting text and your profile go to the Claude
-  API. The API key is encrypted with Windows DPAPI.
+- **Posting text is data.** The model gets each posting as escaped JSON, has no tools, and must
+  answer in a fixed JSON format. Planted "AI check" instructions are flagged, not followed.
+- **No downloads**, and data stays on this PC. Only posting text and your profile go to the AI
+  provider you pick (nothing leaves the PC with LM Studio). API keys are encrypted with Windows DPAPI.
 
 ## Where things live
 
@@ -55,7 +73,7 @@ and -0.5 for a thin description, rounded to 0.5.
 | --- | --- |
 | Postings, scores, statuses, profile, scan history | `%APPDATA%\SCOPE Scout\scope-scout.json` |
 | Copy taken before each scan | `%APPDATA%\SCOPE Scout\scope-scout.backup.json` |
-| Model choice and encrypted API key | `%APPDATA%\SCOPE Scout\settings.json` |
+| AI provider settings and encrypted API keys | `%APPDATA%\SCOPE Scout\settings.json` |
 | SCOPE login session | `%APPDATA%\SCOPE Scout\Partitions\scope` |
 
 ## New co-op cycle
@@ -78,7 +96,8 @@ npm run build:win  # Windows installer (not needed for daily use)
 | `src/shared/` | Types, config and pure functions (match score, sections, parsing) used everywhere |
 | `src/main/scan.ts` | The scan pipeline |
 | `src/main/scope.ts`, `scope-inpage.js` | The SCOPE window and the code that runs inside SCOPE pages |
-| `src/main/ai.ts`, `prompts.ts` | All Claude API calls and prompts |
+| `src/main/ai.ts`, `prompts.ts` | Provider-neutral AI layer (JSON checking, retries, cost) and prompts |
+| `src/main/providers/` | `anthropic.ts` for Claude, `openai.ts` for DeepSeek, LM Studio and other OpenAI-style servers |
 | `src/main/store.ts`, `settings.ts` | Local storage |
 | `src/renderer/src/` | The React UI |
 | `tools/import_workbook.py` | One-time import from the old workbook |
