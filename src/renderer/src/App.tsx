@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { marksFor, parseQuery, type Mark } from '../../shared/search'
+import { sheetById } from '../../shared/sheets'
 import type {
   AppData,
   MyStatus,
@@ -8,22 +10,37 @@ import type {
   SettingsView
 } from '../../shared/types'
 import PostingDetail from './components/PostingDetail'
+import SearchBar from './components/SearchBar'
 import Settings from './components/Settings'
 import TopNav, { type View } from './components/TopNav'
 import HomePage from './pages/HomePage'
 import PostingsPage from './pages/PostingsPage'
 import RunsPage from './pages/RunsPage'
+import SearchPage from './pages/SearchPage'
+import {
+  MAX_RECENT,
+  POSTINGS_KEY,
+  RECENT_KEY,
+  SEARCH_KEY,
+  parsePostingsView,
+  parseRecent,
+  parseSearchState,
+  useStored
+} from './storage'
 
 /** Ctrl+1, 2 and 3 switch pages. */
 const NAV_KEYS: Record<string, View> = { '1': 'home', '2': 'postings', '3': 'runs' }
+const NO_POSTINGS: Posting[] = []
 
-/** A posting opened from Home or Past runs slides in over the page. */
+/** A posting opened from Home, Past runs or the search box slides in over the page. */
 function Drawer({
   posting,
+  marks,
   onClose,
   onStatus
 }: {
   posting: Posting
+  marks: Mark[]
   onClose: () => void
   onStatus: (id: string, status: MyStatus) => void
 }): React.JSX.Element {
@@ -42,7 +59,7 @@ function Drawer({
         aria-label={posting.listing.title}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <PostingDetail posting={posting} onClose={onClose} onStatus={onStatus} />
+        <PostingDetail posting={posting} marks={marks} onClose={onClose} onStatus={onStatus} />
       </aside>
     </div>
   )
@@ -57,6 +74,12 @@ export default function App(): React.JSX.Element {
   const [view, setView] = useState<View>('home')
   const [drawerId, setDrawerId] = useState<string | null>(null)
   const [showSettings, setShowSettings] = useState(false)
+  // What's in the search box. The Search page shows results for it.
+  const [query, setQuery] = useState('')
+  const [postingsView, setPostingsView] = useStored(POSTINGS_KEY, parsePostingsView)
+  const [searchState, setSearchState] = useStored(SEARCH_KEY, parseSearchState)
+  const [recent, setRecent] = useStored(RECENT_KEY, parseRecent)
+  const drawerMarks = useMemo(() => marksFor(parseQuery(query)), [query])
 
   useEffect(() => {
     const load = async (): Promise<void> => {
@@ -86,6 +109,7 @@ export default function App(): React.JSX.Element {
       e.preventDefault()
       setView(NAV_KEYS[e.key])
       setDrawerId(null)
+      setQuery('')
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -94,6 +118,36 @@ export default function App(): React.JSX.Element {
   function navigate(next: View): void {
     setView(next)
     setDrawerId(null)
+    // The search box belongs to the Search page; other pages start with it empty.
+    if (next !== 'search') setQuery('')
+  }
+
+  function search(q: string): void {
+    const text = q.trim()
+    if (text) setRecent([text, ...recent.filter((r) => r !== text)].slice(0, MAX_RECENT))
+    setQuery(q)
+    setView('search')
+    setDrawerId(null)
+  }
+
+  function openAdvanced(): void {
+    setSearchState({ ...searchState, advanced: true })
+    setView('search')
+    setDrawerId(null)
+  }
+
+  /** Adds the words in the search box as a Keywords filter on the open sheet. */
+  function filterSheet(text: string): void {
+    const id = postingsView.sheetId
+    const conditions = postingsView.filters[id] ?? []
+    setPostingsView({
+      ...postingsView,
+      filters: {
+        ...postingsView.filters,
+        [id]: [...conditions, { field: 'keywords', op: 'contains', value: text }]
+      }
+    })
+    setQuery('')
   }
 
   async function scan(): Promise<void> {
@@ -135,6 +189,21 @@ export default function App(): React.JSX.Element {
         scope={scope}
         onOpenScope={() => window.api.openScope()}
         onOpenSettings={() => setShowSettings(true)}
+        search={
+          <SearchBar
+            query={query}
+            onQuery={setQuery}
+            onSubmit={search}
+            onOpenPosting={setDrawerId}
+            onAdvanced={openAdvanced}
+            onFilterSheet={view === 'postings' ? filterSheet : undefined}
+            sheetLabel={sheetById(postingsView.sheetId).label}
+            postings={data?.postings ?? NO_POSTINGS}
+            recent={recent}
+            onClearRecent={() => setRecent([])}
+            onSearchPage={view === 'search'}
+          />
+        }
       />
 
       {view === 'home' && (
@@ -152,11 +221,34 @@ export default function App(): React.JSX.Element {
           onSeeRuns={() => navigate('runs')}
         />
       )}
-      {view === 'postings' && <PostingsPage data={data} onStatus={changeStatus} />}
+      {view === 'postings' && (
+        <PostingsPage
+          data={data}
+          view={postingsView}
+          onView={setPostingsView}
+          onStatus={changeStatus}
+        />
+      )}
       {view === 'runs' && <RunsPage runs={data?.runs ?? []} onOpenPosting={setDrawerId} />}
+      {view === 'search' && (
+        <SearchPage
+          data={data}
+          query={query}
+          onQuery={setQuery}
+          state={searchState}
+          onState={setSearchState}
+          recent={recent}
+          onStatus={changeStatus}
+        />
+      )}
 
       {drawerPosting && (
-        <Drawer posting={drawerPosting} onClose={() => setDrawerId(null)} onStatus={changeStatus} />
+        <Drawer
+          posting={drawerPosting}
+          marks={drawerMarks}
+          onClose={() => setDrawerId(null)}
+          onStatus={changeStatus}
+        />
       )}
       {showSettings && settings && (
         <Settings

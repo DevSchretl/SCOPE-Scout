@@ -7,10 +7,12 @@ import {
   Table2,
   type LucideIcon
 } from 'lucide-react'
+import type { ReactNode } from 'react'
 import type { ScopeStatus } from '../../../shared/types'
 import { SCOPE_TEXT } from '../format'
 
-export type View = 'home' | 'postings' | 'runs'
+/** The pages. Search has no link: you reach it from the search box. */
+export type View = 'home' | 'postings' | 'runs' | 'search'
 
 const LINKS: { id: View; label: string; icon: LucideIcon }[] = [
   { id: 'home', label: 'Home', icon: House },
@@ -26,6 +28,8 @@ interface Props {
   scope: ScopeStatus
   onOpenScope: () => void
   onOpenSettings: () => void
+  /** The search box, which sits in the middle of the bar. */
+  search: ReactNode
 }
 
 export default function TopNav({
@@ -35,7 +39,8 @@ export default function TopNav({
   progress,
   scope,
   onOpenScope,
-  onOpenSettings
+  onOpenSettings,
+  search
 }: Props): React.JSX.Element {
   return (
     <header className="topnav">
@@ -64,7 +69,7 @@ export default function TopNav({
         ))}
       </nav>
 
-      <span className="nav-spacer" />
+      {search}
 
       {scanning && (
         <button

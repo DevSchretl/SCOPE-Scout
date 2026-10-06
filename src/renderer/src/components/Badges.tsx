@@ -1,7 +1,8 @@
 import type { CSSProperties } from 'react'
 import { DUE_SOON_DAYS } from '../../../shared/config'
+import { daysLeft } from '../../../shared/derive'
 import { MY_STATUSES, type MyStatus, type Posting } from '../../../shared/types'
-import { formatDays, matchColor } from '../format'
+import { formatDate, formatDays, matchColor } from '../format'
 
 export function MatchBadge({
   value,
@@ -69,4 +70,22 @@ export function DaysLeft({ days }: { days: number | null }): React.JSX.Element |
   if (days === null) return null
   if (days < 0) return <span className="days closed">closed</span>
   return <span className={days <= DUE_SOON_DAYS ? 'days soon' : 'days'}>{formatDays(days)}</span>
+}
+
+/** Your status as a small colored tag, or nothing when it isn't set. */
+export function StatusTag({ status }: { status: MyStatus }): React.JSX.Element | null {
+  if (!status) return null
+  return <span className={`tag status ${STATUS_CLASS[status]}`}>{status}</span>
+}
+
+/** "closes Oct 12" (amber when close), or "closed". */
+export function Closes({ deadline }: { deadline: string | null }): React.JSX.Element | null {
+  const days = daysLeft(deadline)
+  if (deadline === null || days === null) return null
+  if (days < 0) return <span className="closes closed">closed</span>
+  return (
+    <span className={days <= DUE_SOON_DAYS ? 'closes soon' : 'closes'}>
+      closes {formatDate(deadline)}
+    </span>
+  )
 }

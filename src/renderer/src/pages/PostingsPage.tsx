@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FilterX, Inbox, Search } from 'lucide-react'
+import { FilterX, Inbox } from 'lucide-react'
 import {
+  SHEET_FIELDS,
   applyFilters,
   filterContext,
-  fold,
   isActive,
-  validConditions,
   type Condition
 } from '../../../shared/filters'
 import { SHEETS, sheetById } from '../../../shared/sheets'
@@ -14,68 +13,32 @@ import FilterBar from '../components/FilterBar'
 import PostingDetail from '../components/PostingDetail'
 import PostingTable from '../components/PostingTable'
 import SheetPicker from '../components/SheetPicker'
+import type { PostingsView } from '../storage'
 
 interface Props {
   data: AppData | null
+  /** The open sheet and each sheet's filters (kept by App, so search can add to them). */
+  view: PostingsView
+  onView: (view: PostingsView) => void
   onStatus: (id: string, status: MyStatus) => void
 }
 
-/** The open sheet and each sheet's filters, remembered between visits and restarts. */
-interface Saved {
-  sheetId: string
-  filters: Record<string, Condition[]>
-}
-
-const STORAGE_KEY = 'scout.postings'
 const NO_POSTINGS: Posting[] = []
 const NO_CONDITIONS: Condition[] = []
-
-function load(): Saved {
-  const saved: Saved = { sheetId: SHEETS[0].id, filters: {} }
-  try {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}')
-    if (SHEETS.some((s) => s.id === raw?.sheetId)) saved.sheetId = raw.sheetId
-    for (const s of SHEETS) {
-      const conditions = validConditions(raw?.filters?.[s.id])
-      if (conditions.length) saved.filters[s.id] = conditions
-    }
-  } catch {
-    // Unreadable or unavailable storage: start fresh.
-  }
-  return saved
-}
-
-function store(saved: Saved): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved))
-  } catch {
-    // Not remembering the view is fine.
-  }
-}
-
-/** Today's quick search: ID, title, organization, location or city. */
-function findMatch(p: Posting, q: string): boolean {
-  if (!q) return true
-  const l = p.listing
-  return [p.id, l.title, l.org, l.location, p.score?.city ?? ''].some((s) => fold(s).includes(q))
-}
 
 const EMPTY_TEXT: Record<string, string> = {
   near: 'Postings the AI read but rated just under the bar show up here.',
   inprog: 'Set a posting to Drafting or Applied, or apply on SCOPE, and it shows up here.'
 }
 
-export default function PostingsPage({ data, onStatus }: Props): React.JSX.Element {
-  const [saved, setSaved] = useState(load)
-  const [find, setFind] = useState('')
+export default function PostingsPage({ data, view, onView, onStatus }: Props): React.JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const dock = useRef<HTMLElement>(null)
 
   const postings = data?.postings ?? NO_POSTINGS
   const lastRun = data?.lastRun ?? null
-  const sheet = sheetById(saved.sheetId)
-  const conditions = saved.filters[sheet.id] ?? NO_CONDITIONS
-  const q = fold(find.trim())
+  const sheet = sheetById(view.sheetId)
+  const conditions = view.filters[sheet.id] ?? NO_CONDITIONS
 
   const counts = useMemo(
     () => Object.fromEntries(SHEETS.map((s) => [s.id, postings.filter(s.test).length])),
@@ -83,14 +46,11 @@ export default function PostingsPage({ data, onStatus }: Props): React.JSX.Eleme
   )
   const sheetRows = useMemo(() => postings.filter(sheet.test), [postings, sheet])
   const rows = useMemo(
-    () =>
-      applyFilters(sheetRows, conditions, filterContext(lastRun))
-        .filter((p) => findMatch(p, q))
-        .sort(sheet.sort),
-    [sheetRows, conditions, lastRun, q, sheet]
+    () => applyFilters(sheetRows, conditions, filterContext(lastRun)).sort(sheet.sort),
+    [sheetRows, conditions, lastRun, sheet]
   )
   const filtered = new Set(
-    Object.entries(saved.filters)
+    Object.entries(view.filters)
       .filter(([, cs]) => cs.some(isActive))
       .map(([id]) => id)
   )
@@ -107,13 +67,8 @@ export default function PostingsPage({ data, onStatus }: Props): React.JSX.Eleme
     return () => window.removeEventListener('keydown', onKey)
   }, [selectedId])
 
-  function update(next: Saved): void {
-    setSaved(next)
-    store(next)
-  }
-
   function setConditions(next: Condition[]): void {
-    update({ ...saved, filters: { ...saved.filters, [sheet.id]: next } })
+    onView({ ...view, filters: { ...view.filters, [sheet.id]: next } })
   }
 
   let body: React.JSX.Element
@@ -134,16 +89,9 @@ export default function PostingsPage({ data, onStatus }: Props): React.JSX.Eleme
       <div className="empty-state">
         <FilterX size={30} />
         <h3>No postings match</h3>
-        <p>Nothing on this sheet fits your filters{q ? ' and search' : ''}.</p>
-        <button
-          type="button"
-          className="btn"
-          onClick={() => {
-            setConditions([])
-            setFind('')
-          }}
-        >
-          Clear filters{q ? ' and search' : ''}
+        <p>Nothing on this sheet fits your filters.</p>
+        <button type="button" className="btn" onClick={() => setConditions([])}>
+          Clear filters
         </button>
       </div>
     )
@@ -164,22 +112,8 @@ export default function PostingsPage({ data, onStatus }: Props): React.JSX.Eleme
             sheet={sheet}
             counts={counts}
             filtered={filtered}
-            onChoose={(id) => update({ ...saved, sheetId: id })}
+            onChoose={(id) => onView({ ...view, sheetId: id })}
           />
-          <span className="spacer" />
-          <label className="find-box">
-            <Search size={15} />
-            <input
-              type="search"
-              placeholder="Find in this sheet"
-              aria-label="Find in this sheet"
-              value={find}
-              onChange={(e) => setFind(e.target.value)}
-            />
-          </label>
-        </div>
-        <div className="toolbar-row">
-          <FilterBar conditions={conditions} onChange={setConditions} postings={sheetRows} />
           <span className="spacer" />
           {data && (
             <span className="showing">
@@ -192,6 +126,14 @@ export default function PostingsPage({ data, onStatus }: Props): React.JSX.Eleme
               )}
             </span>
           )}
+        </div>
+        <div className="toolbar-row">
+          <FilterBar
+            conditions={conditions}
+            onChange={setConditions}
+            postings={sheetRows}
+            fields={SHEET_FIELDS}
+          />
         </div>
       </div>
 

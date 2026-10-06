@@ -40,13 +40,14 @@ models. Small local models (under about 7B parameters) often get the scoring for
 
 ## Daily use
 
-The navy bar at the top switches between three pages (or press Ctrl+1, 2 or 3):
+The navy bar at the top switches between three pages (or press Ctrl+1, 2 or 3), and holds the
+search box (see Search below):
 
 - **Home**: **Scan now**, **Open SCOPE**, which AI provider to use, and the latest scan's summary.
 - **Postings**: the old workbook's sheets (a picks sheet per quick search, Near misses, In progress
   and All postings), chosen from the dropdown at the top left. **Filter** narrows a sheet by match,
-  fit, organization, location, province, deadline, your status and more. Each sheet keeps its own
-  filters, even after a restart. Click a row to read the posting.
+  fit, organization, location, province, deadline, keywords, your status and more. Each sheet
+  keeps its own filters, even after a restart. Click a row to read the posting.
 - **Past runs**: every scan's summary, newest first, with what it cost.
 
 Press **Scan now** on Home. One scan:
@@ -61,11 +62,36 @@ Press **Scan now** on Home. One scan:
    on Home and in Past runs, and a Windows notification.
 
 Set **Status** on any posting (To apply, Drafting, Applied, Skip). Drafting and Applied move it to
-In progress, as does any application SCOPE shows. **Find in this sheet** covers the old RBC tab.
+In progress, as does any application SCOPE shows. Search covers the old RBC tab.
 
 **Match /10** uses the workbook's formula: 10 x (0.45 x required share squared + 0.15 x preferred
 share + 0.40 x (fit - 1) / 4), minus a competition penalty (10+ applicants -0.5, 30+ -1, 60+ -1.5)
 and -0.5 for a thin description, rounded to 0.5.
+
+## Search
+
+The search box in the navy bar (Ctrl+K, or / when you aren't typing) searches every posting the
+scans have listed: titles, organizations, locations, job IDs and, for postings the AI read, the
+whole posting and the AI's notes. Results show as you type. Enter opens the Search page, with
+filters, sorting and **Advanced** search (boxes that write the query for you).
+
+| Type | To find |
+| --- | --- |
+| `data analyst` | postings with both words. A word also finds longer words it starts: `dev` finds developer |
+| `"machine learning"` | the exact phrase |
+| `python -senior` | python, but not senior |
+| `react OR vue` | either word |
+| `org:shopify`, `org:"Capital One"` | one organization |
+| `city:vancouver` | a city, province or country (`location:` works too) |
+| `title:intern`, `desc:`, `req:`, `notes:` | a word in the title, description, requirements or AI notes |
+| `183097` or `id:183097` | a job ID |
+| `term:w27`, `status:applied` | a term, or your status or SCOPE's (`status:none` for no status) |
+| `in:title,org data` | words without a prefix only look in those fields |
+
+Accents don't matter (`montreal` finds Montréal). Open postings come first, then closed ones and
+ones gone from SCOPE. Best match ranks where the words appear (job ID, then title, organization,
+location, requirements, description) and then how well the posting fits you. On the Postings
+page, the search box can also add the words to the open sheet as a **Keywords** filter.
 
 ## Rules the code keeps
 
@@ -103,7 +129,7 @@ npm run build:win  # Windows installer (not needed for daily use)
 
 | File | Job |
 | --- | --- |
-| `src/shared/` | Types, config and pure functions (match score, sections, parsing, sheets, filters) used everywhere |
+| `src/shared/` | Types, config and pure functions (match score, sections, parsing, sheets, filters, search) used everywhere |
 | `src/main/scan.ts` | The scan pipeline |
 | `src/main/scope.ts`, `scope-inpage.js` | The SCOPE window and the code that runs inside SCOPE pages |
 | `src/main/ai.ts`, `prompts.ts` | Provider-neutral AI layer (JSON checking, retries, cost) and prompts |

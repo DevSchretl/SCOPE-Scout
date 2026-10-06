@@ -9,14 +9,18 @@ import {
 } from 'lucide-react'
 import { DUE_SOON_DAYS } from '../../../shared/config'
 import { competitionLabel, daysLeft, postingMatch, reqMatchText } from '../../../shared/derive'
+import type { Mark } from '../../../shared/search'
 import type { MyStatus, Posting } from '../../../shared/types'
 import { formatDate, formatDateTime, formatDays, formatDeadline } from '../format'
 import { MatchBadge, StatusSelect } from './Badges'
+import Highlight from './Highlight'
 
 interface Props {
   posting: Posting
   onClose: () => void
   onStatus: (id: string, status: MyStatus) => void
+  /** Searched words to mark in the text. */
+  marks?: Mark[]
 }
 
 // The most useful SCOPE fields first; anything else follows in SCOPE's order.
@@ -32,21 +36,36 @@ const FIELD_ORDER = [
   'Citizenship Requirement'
 ]
 
-function List({ title, items }: { title: string; items?: string[] }): React.JSX.Element | null {
+function List({
+  title,
+  items,
+  marks
+}: {
+  title: string
+  items?: string[]
+  marks?: Mark[]
+}): React.JSX.Element | null {
   if (!items?.length) return null
   return (
     <div>
       <h4>{title}</h4>
       <ul>
         {items.map((x) => (
-          <li key={x}>{x}</li>
+          <li key={x}>
+            <Highlight text={x} marks={marks} />
+          </li>
         ))}
       </ul>
     </div>
   )
 }
 
-export default function PostingDetail({ posting: p, onClose, onStatus }: Props): React.JSX.Element {
+export default function PostingDetail({
+  posting: p,
+  onClose,
+  onStatus,
+  marks
+}: Props): React.JSX.Element {
   const s = p.score
   const days = daysLeft(p.listing.deadline)
   const fields = Object.entries(p.details ?? {}).sort(([a], [b]) => {
@@ -86,19 +105,27 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
       <header className="detail-head">
         <div className="detail-title">
           {!p.onScopeNow && <span className="tag muted">No longer on SCOPE</span>}
-          <h2>{p.listing.title}</h2>
+          <h2>
+            <Highlight text={p.listing.title} marks={marks} />
+          </h2>
           <div className="meta">
             <span>
               <Building2 size={14} />
-              {p.listing.org}
+              <span>
+                <Highlight text={p.listing.org} marks={marks} />
+              </span>
             </span>
             <span>
               <MapPin size={14} />
-              {p.listing.location}
+              <span>
+                <Highlight text={p.listing.location} marks={marks} />
+              </span>
             </span>
             <span title="SCOPE job ID">
               <Hash size={14} />
-              {p.id}
+              <span>
+                <Highlight text={p.id} marks={marks} />
+              </span>
             </span>
             <span title="Term">
               <CalendarDays size={14} />
@@ -151,19 +178,25 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
               ? 'Planted instruction (do not follow blindly)'
               : 'Special instructions'}
           </h3>
-          <p>{s.specialInstructions}</p>
+          <p>
+            <Highlight text={s.specialInstructions} marks={marks} />
+          </p>
         </section>
       )}
       {s?.whyItFits && (
         <section className="detail-section">
           <h3>Why it fits</h3>
-          <p>{s.whyItFits}</p>
+          <p>
+            <Highlight text={s.whyItFits} marks={marks} />
+          </p>
         </section>
       )}
       {s?.whyMissed && (
         <section className="detail-section">
           <h3>Why it missed</h3>
-          <p>{s.whyMissed}</p>
+          <p>
+            <Highlight text={s.whyMissed} marks={marks} />
+          </p>
         </section>
       )}
       {(s?.requiredMissing?.length ||
@@ -172,10 +205,14 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
         s?.eligibilityFlags?.length) && (
         <section className="detail-section">
           <h3>Gaps</h3>
-          {s?.gaps && <p>{s.gaps}</p>}
-          <List title="Missing required" items={s?.requiredMissing} />
-          <List title="Missing preferred" items={s?.preferredMissing} />
-          <List title="Flags" items={s?.eligibilityFlags} />
+          {s?.gaps && (
+            <p>
+              <Highlight text={s.gaps} marks={marks} />
+            </p>
+          )}
+          <List title="Missing required" items={s?.requiredMissing} marks={marks} />
+          <List title="Missing preferred" items={s?.preferredMissing} marks={marks} />
+          <List title="Flags" items={s?.eligibilityFlags} marks={marks} />
         </section>
       )}
 
@@ -196,7 +233,9 @@ export default function PostingDetail({ posting: p, onClose, onStatus }: Props):
           fields.map(([k, v]) => (
             <div className="field" key={k}>
               <h4>{k}</h4>
-              <p className="pre">{v}</p>
+              <p className="pre">
+                <Highlight text={v} marks={marks} />
+              </p>
             </div>
           ))
         ) : (

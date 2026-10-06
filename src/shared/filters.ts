@@ -1,8 +1,11 @@
-// Filters for the Postings page: conditions on posting fields, all of which must match.
-// Pure functions, so the UI and the tests share one engine.
+// Filters for the Postings and Search pages: conditions on posting fields, all of which
+// must match. Pure functions, so the UI and the tests share one engine.
 
 import { NEW_PICK_MIN_MATCH, QUICK_SEARCHES } from './config'
 import { daysLeft, isNewIn, postingMatch } from './derive'
+import { matchesText } from './search'
+import { SHEETS } from './sheets'
+import { fold } from './text'
 import { MY_STATUSES, type Posting, type RunRecord } from './types'
 
 export interface FilterContext {
@@ -36,16 +39,19 @@ interface FieldBase {
   id: string
   label: string
   group: FieldGroup
+  /** Operator names in the editor where the defaults ("at least", ...) read badly. */
+  opLabels?: Partial<Record<Op, string>>
+  /**
+   * Chip text per operator: {label} is the field, {n} a number, {a} and {b} a range,
+   * {v} the text typed.
+   */
+  chips?: Partial<Record<Op, string>>
 }
 
 export interface NumberField extends FieldBase {
   type: 'number'
   get: (p: Posting, ctx: FilterContext) => number | null
   ops: NumberOp[]
-  /** Operator names in the editor where the defaults ("at least", ...) read badly. */
-  opLabels?: Partial<Record<NumberOp, string>>
-  /** Chip text per operator: {label} is the field, {n} the value, {a} and {b} a range. */
-  chips?: Partial<Record<NumberOp, string>>
   step: number
   unit?: string
 }
@@ -53,6 +59,8 @@ export interface NumberField extends FieldBase {
 export interface TextField extends FieldBase {
   type: 'text'
   get: (p: Posting) => string
+  /** Decides "contains" in place of a plain substring test (Keywords runs a search). */
+  match?: (p: Posting, text: string) => boolean
 }
 
 export interface ChoiceField extends FieldBase {
@@ -167,6 +175,17 @@ export const FIELDS: Field[] = [
     get: (p) => p.score?.section ?? 'unscored',
     order: Object.keys(VERDICTS),
     name: (v) => VERDICTS[v] ?? v
+  },
+  {
+    id: 'keywords',
+    label: 'Keywords',
+    group: 'Posting',
+    type: 'text',
+    get: (p) => p.listing.title,
+    // The same matching and syntax as the search box, over the whole posting.
+    match: matchesText,
+    opLabels: { contains: 'mentions', notContains: "doesn't mention" },
+    chips: { contains: 'Mentions {v}', notContains: "Doesn't mention {v}" }
   },
   { id: 'title', label: 'Title', group: 'Posting', type: 'text', get: (p) => p.listing.title },
   {
@@ -342,8 +361,20 @@ export const FIELDS: Field[] = [
     get: (p) => !!p.score?.plantedInstruction,
     yes: 'Planted AI instruction',
     no: 'No planted instruction'
+  },
+  {
+    id: 'sheet',
+    label: 'Sheet',
+    group: 'Status',
+    type: 'choice',
+    get: (p) => SHEETS.find((s) => s.kind !== 'all' && s.test(p))?.id ?? '',
+    order: SHEETS.filter((s) => s.kind !== 'all').map((s) => s.id),
+    name: (v) => SHEETS.find((s) => s.id === v)?.label ?? 'Not picked'
   }
 ]
+
+/** The Postings page leaves out Sheet, since its dropdown already picks one. */
+export const SHEET_FIELDS = FIELDS.filter((f) => f.id !== 'sheet')
 
 const BY_ID = new Map(FIELDS.map((f) => [f.id, f]))
 
@@ -365,11 +396,6 @@ export const PRESETS: { label: string; condition: Condition }[] = [
 
 export function sameCondition(a: Condition, b: Condition): boolean {
   return JSON.stringify(a) === JSON.stringify(b)
-}
-
-/** Lowercase without accents, so "montreal" finds "Montréal". */
-export function fold(s: string): string {
-  return s.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
 }
 
 export function opsFor(field: Field): Op[] {
@@ -399,7 +425,7 @@ const OP_LABELS: Record<Op, string> = {
 }
 
 export function opLabel(field: Field, op: Op): string {
-  return (field.type === 'number' && field.opLabels?.[op as NumberOp]) || OP_LABELS[op]
+  return field.opLabels?.[op] ?? OP_LABELS[op]
 }
 
 /** An empty condition for a field; it filters nothing until it has a value. */
@@ -477,7 +503,9 @@ export function testCondition(c: Condition, p: Posting, ctx: FilterContext): boo
     case 'contains':
     case 'notContains': {
       if (f.type !== 'text' && f.type !== 'choice') return true
-      const hit = fold(f.get(p)).includes(fold(c.value.trim()))
+      const text = c.value.trim()
+      const hit =
+        f.type === 'text' && f.match ? f.match(p, text) : fold(f.get(p)).includes(fold(text))
       return c.op === 'contains' ? hit : !hit
     }
     case 'in':
@@ -551,16 +579,19 @@ export function describeCondition(c: Condition): string {
     case 'between':
     case 'empty':
     case 'notEmpty': {
-      const template = (f.type === 'number' && f.chips?.[c.op]) || NUMBER_CHIPS[c.op]
+      const template = f.chips?.[c.op] ?? NUMBER_CHIPS[c.op]
       const text = template.replace('{label}', f.label)
       if (c.op === 'between')
         return text.replace('{a}', shown(c.value[0])).replace('{b}', shown(c.value[1]))
       return c.op === 'gte' || c.op === 'lte' ? text.replace('{n}', shown(c.value)) : text
     }
     case 'contains':
-      return `${f.label} contains "${c.value.trim() || '...'}"`
-    case 'notContains':
-      return `${f.label} doesn't contain "${c.value.trim() || '...'}"`
+    case 'notContains': {
+      const text = c.value.trim() || '...'
+      const template = f.chips?.[c.op]
+      if (template) return template.replace('{label}', f.label).replace('{v}', text)
+      return `${f.label} ${c.op === 'contains' ? 'contains' : "doesn't contain"} "${text}"`
+    }
     case 'in':
     case 'notIn': {
       const names = f.type === 'choice' ? c.value.map((v) => choiceName(f, v)) : c.value

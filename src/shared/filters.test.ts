@@ -7,6 +7,7 @@ import {
   newCondition,
   optionsFor,
   regionOf,
+  SHEET_FIELDS,
   validConditions,
   withOp,
   type ChoiceField,
@@ -247,5 +248,29 @@ describe('stored conditions', () => {
     ]
     expect(validConditions(raw)).toEqual([{ field: 'match', op: 'gte', value: 7 }])
     expect(validConditions({ not: 'a list' })).toEqual([])
+  })
+})
+
+describe('keywords and sheets', () => {
+  it('runs a search for Keywords', () => {
+    const ps = [
+      make('a', { details: { 'Job Description': 'Python and SQL every day' } }),
+      make('b', {}, { title: 'Python Senior Developer' })
+    ]
+    expect(run([{ field: 'keywords', op: 'contains', value: 'python -senior' }], ps)).toEqual(['a'])
+    expect(run([{ field: 'keywords', op: 'notContains', value: 'sql' }], ps)).toEqual(['b'])
+    expect(describeCondition({ field: 'keywords', op: 'contains', value: 'python' })).toBe(
+      'Mentions python'
+    )
+  })
+
+  it('knows which sheet a posting is on', () => {
+    const ps = [
+      make('pick', { score: { section: 'pick' } }),
+      make('near', { score: { section: 'near' } }),
+      make('none')
+    ]
+    expect(run([{ field: 'sheet', op: 'in', value: ['near', ''] }], ps)).toEqual(['near', 'none'])
+    expect(SHEET_FIELDS.some((f) => f.id === 'sheet')).toBe(false)
   })
 })

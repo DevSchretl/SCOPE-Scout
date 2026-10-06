@@ -17,7 +17,6 @@ import {
   choiceName,
   describeCondition,
   fieldById,
-  fold,
   isActive,
   newCondition,
   opLabel,
@@ -30,6 +29,7 @@ import {
   type Field,
   type Op
 } from '../../../shared/filters'
+import { fold } from '../../../shared/text'
 import type { Posting } from '../../../shared/types'
 import Popover, { type PopoverReason } from './Popover'
 
@@ -43,11 +43,18 @@ const TYPE_ICONS: Record<Field['type'], LucideIcon> = {
 interface Props {
   conditions: Condition[]
   onChange: (conditions: Condition[]) => void
-  /** The sheet's postings before filtering, for the value lists and their counts. */
+  /** The postings before filtering, for the value lists and their counts. */
   postings: Posting[]
+  /** The fields on offer (all of them by default). */
+  fields?: Field[]
 }
 
-export default function FilterBar({ conditions, onChange, postings }: Props): React.JSX.Element {
+export default function FilterBar({
+  conditions,
+  onChange,
+  postings,
+  fields = FIELDS
+}: Props): React.JSX.Element {
   const [adding, setAdding] = useState(false)
   const [fieldQuery, setFieldQuery] = useState('')
   const [editing, setEditing] = useState<number | null>(null)
@@ -79,7 +86,7 @@ export default function FilterBar({ conditions, onChange, postings }: Props): Re
   }
 
   const q = fold(fieldQuery.trim())
-  const fields = FIELDS.filter((f) => !q || fold(`${f.label} ${f.group}`).includes(q))
+  const offered = fields.filter((f) => !q || fold(`${f.label} ${f.group}`).includes(q))
 
   return (
     <div className="filter-bar">
@@ -130,7 +137,7 @@ export default function FilterBar({ conditions, onChange, postings }: Props): Re
         </label>
         <div className="field-list">
           {FIELD_GROUPS.map((group) => {
-            const inGroup = fields.filter((f) => f.group === group)
+            const inGroup = offered.filter((f) => f.group === group)
             if (!inGroup.length) return null
             return (
               <div key={group} className="menu-group">
@@ -152,7 +159,7 @@ export default function FilterBar({ conditions, onChange, postings }: Props): Re
               </div>
             )
           })}
-          {!fields.length && <p className="menu-empty">No field matches that.</p>}
+          {!offered.length && <p className="menu-empty">No field matches that.</p>}
         </div>
       </Popover>
 
